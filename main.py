@@ -29,11 +29,11 @@ def normalize_img(image, label):
 def to_char(num):
     # Return the number in ASCII form
     if num < 10:
-        return chr(num + 48)
+        return chr(num + 48)    # Numeric values start at 48 on the ascii table
     elif num < 36:
-        return chr(num + 55)
+        return chr(num + 55)    # Uppercase starts at 65, subtract 10 to account for numerics in dataset
     else:
-        return chr(num + 61)
+        return chr(num + 61)    # Lowercase starts at 97, subtract 36 to account for other values in dataset
 
 
 def main():
@@ -74,12 +74,10 @@ def main():
     # Check if a save model exists, otherwise create a new model
     if len(os.listdir(path=models_dir)) > 0:
         print("Loading model...")
-        # Load the existing model
         model = keras.models.load_model(filepath=models_dir)
         print("Model loaded!\n")
     else:
         print("Building new model...")
-        # Build the network model
         model = keras.Sequential([
             layers.Flatten(input_shape=(28, 28, 1)),
             layers.Dense(128, activation='relu'),
