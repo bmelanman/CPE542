@@ -2,6 +2,8 @@ import tensorflow_datasets as tf_ds
 import matplotlib.pyplot as plt
 import numpy as np
 
+from main import to_char
+
 
 def tfDataset2Lists(dataset):
     # Converts tf dataset to individual lists of images and corresponding labels
@@ -16,7 +18,7 @@ def plot_image(image, image_label, prediction):
     plt.grid(False)
 
     # Plot given image
-    plt.imshow(image, cmap=plt.cm.binary)
+    plt.imshow(np.transpose(image, axes=[1, 0, 2]), cmap=plt.cm.binary)
 
     # Label image and use color to indicate accuracy
     pred_label = np.argmax(prediction)
@@ -26,8 +28,8 @@ def plot_image(image, image_label, prediction):
         c = 'red'
 
     plt.xlabel(
-        f"Prediction: {pred_label} ({(100 * np.max(prediction)):2.0f}%)\n"
-        f"Actual: {image_label}",
+        f"Prediction: {to_char(pred_label)} ({(100 * np.max(prediction)):2.0f}%)\n"
+        f"Actual: {to_char(image_label)}",
         color=c
     )
 
