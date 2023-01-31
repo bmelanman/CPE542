@@ -2,7 +2,7 @@ import tensorflow_datasets as tf_ds
 import matplotlib.pyplot as plt
 import numpy as np
 
-from main import to_char
+from number_test import to_char
 
 
 def tfDataset2Lists(dataset):

@@ -1,130 +1,66 @@
-# TensorFlow
-import os
-
-import numpy as np
-import tensorflow as tf
-import tensorflow_datasets as tf_ds
+import os.path
 import keras
-from keras import layers
+import numpy as np
 
-# Misc.
-import plot_results as my_plt
-import random as r
+from generateModel_OCR import ocr
+from PIL import Image
+from skimage import transform
 
-models_dir = "./models"
-dataset_dir = "./datasets"
-batch_size = 32
-
-if not os.path.isdir(models_dir):
-    os.mkdir(models_dir)
-if not os.path.isdir(dataset_dir):
-    os.mkdir(dataset_dir)
-
-
-def normalize_img(image, label):
-    # Normalizes images and casts image data to float32
-    return tf.cast(image, tf.float32) / 255., label
-
-
-def to_char(num):
-    # Return the number in ASCII form
-    if num < 10:
-        return chr(num + 48)    # Numeric values start at 48 on the ascii table
-    elif num < 36:
-        return chr(num + 55)    # Uppercase starts at 65, subtract 10 to account for numerics in dataset
-    else:
-        return chr(num + 61)    # Lowercase starts at 97, subtract 36 to account for other values in dataset
+model_dir = "./models/ocr"
+data_dir = "./datasets"
+test_img_dir = "./test_images/ocr_test.png"
+batch_size = 16
+result_arr = [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  # Numbers
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',  # Uppercase
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',  # Lowercase
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+]
+model_arr = []
 
 
-def main():
-    # Notes:
-    # - Save/Load models to streamline debugging
-    # - Find out how to use Handwriting Sample Form
+def load(filename):
+    np_image = Image.open(filename)
+    np_image = np.array(np_image).astype('float32') / 255
+    np_image = transform.resize(np_image, (28, 28, 1))
+    np_image = np.expand_dims(np_image, axis=0)
+    return np_image
 
-    # Download dataset if necessary
-    tf_ds.builder("emnist").download_and_prepare(download_dir=dataset_dir)
 
-    # Load dataset
-    (train_ds, test_ds), ds_info = tf_ds.load(
-        'emnist',
-        split=['train', 'test'],
-        shuffle_files=True,
-        as_supervised=True,
-        with_info=True
-    )
+def main(new_model=False):
+    if not os.path.isdir(model_dir):
+        print(f"Error! Please create the directory '{model_dir}'")
 
-    length = len(test_ds)
-    print(f"Training data size: {length}")
-    print(f"Testing data size: {length}")
-
-    # Preprocess data
-    train_ds = train_ds \
-        .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .cache() \
-        .shuffle(ds_info.splits['train'].num_examples) \
-        .batch(batch_size) \
-        .prefetch(tf.data.AUTOTUNE)
-
-    test_ds = test_ds \
-        .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .cache() \
-        .batch(batch_size) \
-        .prefetch(tf.data.AUTOTUNE)
-
-    # Check if a save model exists, otherwise create a new model
-    if len(os.listdir(path=models_dir)) > 0:
-        print("Loading model...")
-        model = keras.models.load_model(filepath=models_dir)
-        print("Model loaded!\n")
-    else:
+    if len(os.listdir(path=model_dir)) == 0 or new_model is True:
         print("Building new model...")
-        model = keras.Sequential([
-            layers.Flatten(input_shape=(28, 28, 1)),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(62, activation='softmax')
-        ])
+        ocr(filepath=model_dir, epochs=2)
+        print("Model Built!\n")
 
-        # Compile network
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-
-        # Train and validate the network
-        print("\nTraining model...\n")
-        model.fit(
-            train_ds,
-            epochs=2,
-            validation_data=test_ds,
-            validation_batch_size=batch_size
-        )
-
-        # Save the model
-        keras.models.save_model(model=model, filepath=models_dir)
-        print("Model saved!\n")
+    print("Loading model...")
+    ocr_model = keras.models.load_model(filepath=model_dir)
+    print("Model loaded!\n")
 
     # Test the network
     print("Testing model...")
-    test_results = model.evaluate(test_ds, verbose=1)
-    probability_model = keras.Sequential([model, layers.Softmax()])
-    predictions = probability_model.predict(test_ds, verbose=0)
+    # test_image = load_img(
+    #     test_img_dir,
+    #     color_mode='grayscale',
+    #     target_size=(28, 28)
+    # )
+    test_image = load(test_img_dir)
+    prediction = ocr_model.predict(test_image)
+    np.reshape(prediction, 36)
 
-    print(f"\nTesting accuracy: {(test_results[1] * 100):.2f}%")
-    print("\n")
+    if np.amax(test_image) != np.amin(test_image):
+        index = np.where(prediction == np.amax(prediction))
+        model_arr.append(result_arr[index[1][0]])
 
-    img_arr, lbl_arr = my_plt.tfDataset2Lists(test_ds)
+    print(model_arr)
 
-    while 1:
-        i = r.randint(0, length)
-        print("\n")
-        print(f"Prediction: {to_char(int(np.argmax(predictions[i])))}")
-        print(f"Actual: {to_char(lbl_arr[i])}")
-        my_plt.plot_image(img_arr[i], lbl_arr[i], predictions[i])
-        my_plt.plt.show()
-        input("Press [ENTER] to show another plot")
+    # image = load('my_file.jpg')
+    # model.predict(image)
 
 
 if __name__ == "__main__":
-    main()
+    main(new_model=True)
