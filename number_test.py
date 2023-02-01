@@ -48,16 +48,16 @@ def main():
     print(f"Testing data size: {length}")
 
     # Preprocess data
+    test_ds = test_ds \
+        .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
+        .cache() \
+        .batch(batch_size) \
+        .prefetch(tf.data.AUTOTUNE)
+
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
         .cache() \
         .shuffle(ds_info.splits['train'].num_examples) \
-        .batch(batch_size) \
-        .prefetch(tf.data.AUTOTUNE)
-
-    test_ds = test_ds \
-        .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .cache() \
         .batch(batch_size) \
         .prefetch(tf.data.AUTOTUNE)
 
