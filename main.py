@@ -33,8 +33,10 @@ def pad_resize(orig_image):
 
     # Resize image to new size
     img = tf.image.resize(img, (new_img_size, new_img_size), preserve_aspect_ratio=True)
-    tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
+    # Pad image to get to final size
+    img = tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
 
+    return img
     # orig_size = orig_image.shape
     # padding_size = max(orig_size) - min(orig_size)
     #
@@ -45,8 +47,6 @@ def pad_resize(orig_image):
     #     char_img = cv2.copyMakeBorder(orig_image, 0, 0, padding_size, 0, cv2.BORDER_CONSTANT, value=255)
 
     # tf.image.resize(image, (img_size, img_size)
-
-    return
 
 
 def test(img, model):
