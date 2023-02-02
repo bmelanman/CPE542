@@ -9,7 +9,7 @@ from generateModel_OCR import ocr, input_size, result_arr
 
 model_dir = "./models/ocr"
 data_dir = "./datasets"
-test_img_dir = "./test_images/simple_test_img.png"
+test_img_dir = "./test_images/sample_hsf.jpg"
 batch_size = 16
 
 
@@ -22,7 +22,7 @@ def sort_contours(cnts):
 
 def pad_resize(orig_image):
     # Arbitrary border width
-    border_width = 4
+    border_width = 6
     # New image size based off border width
     new_img_size = input_size - (border_width * 2)
 
@@ -37,31 +37,6 @@ def pad_resize(orig_image):
     img = tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
 
     return img
-    # orig_size = orig_image.shape
-    # padding_size = max(orig_size) - min(orig_size)
-    #
-    # # Add padding onto the shorter axis to make a square image
-    # if orig_size[1] > orig_size[0]:
-    #     char_img = cv2.copyMakeBorder(orig_image, padding_size, 0, 0, 0, cv2.BORDER_CONSTANT, value=255)
-    # else:
-    #     char_img = cv2.copyMakeBorder(orig_image, 0, 0, padding_size, 0, cv2.BORDER_CONSTANT, value=255)
-
-    # tf.image.resize(image, (img_size, img_size)
-
-
-def test(img, model):
-    # Add 3rd axis for model input
-    test_image = np.expand_dims(img, axis=0)
-
-    # Process image
-    result = model.predict(test_image)
-
-    # Make sure the picture isn't blank
-    if np.amax(test_image) != np.amin(test_image):
-
-        # Get the highest prediction
-        index = np.where(result == np.amax(result))
-        return index[1][0]
 
 
 def predict(input_img, ocr_model):
@@ -80,7 +55,7 @@ def predict(input_img, ocr_model):
         avg_area += (w * h)
 
     # TODO: Does this value need to change depending on the image?
-    margin = 0.9
+    margin = 0.8
     avg_area /= len(contours)
     max_area = (1 + margin) * avg_area
     min_area = (1 - margin) * avg_area
@@ -94,7 +69,20 @@ def predict(input_img, ocr_model):
         if max_area > w * h > min_area:
 
             char_img = pad_resize(img[y:y + h, x:x + w])
-            pred = test(char_img, ocr_model)
+
+            # Make sure the picture isn't blank
+            if np.amax(char_img) == np.amin(char_img):
+                return 0
+
+            # Add 3rd axis for model input
+            test_image = np.expand_dims(char_img, axis=0)
+
+            # Process image
+            result = ocr_model.predict(test_image)
+
+            # Get the highest prediction
+            index = np.where(result == np.amax(result))
+            pred = index[1][0]
 
             if pred is None:
                 continue
@@ -103,7 +91,12 @@ def predict(input_img, ocr_model):
             plt.title(f"Fig {i}, Prediction: {result_arr[pred]}, Size: {w * h}")
             plt.show()
             plt.pause(0.5)
-
+            real = input("Actual value? ")
+            try:
+                idx = result_arr.index(real)
+                print(result[0][idx], '\n')
+            except ValueError:
+                pass
         i += 1
 
 
@@ -130,5 +123,3 @@ def main(new_model=False, epochs=3):
 
 if __name__ == "__main__":
     main()
-    cv2.waitKey(10)
-    cv2.destroyAllWindows()
