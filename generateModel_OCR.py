@@ -4,8 +4,6 @@ import tensorflow_datasets as tf_ds
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 
-import matplotlib.pyplot as plt
-
 models_dir = "./models/ocr"
 batch_size = 32
 input_size = 64
@@ -25,7 +23,6 @@ def normalize_img(image, label):
 
 
 def ocr(filepath="./models", epochs=12):
-
     # Creating the CNN model
     ocr_model = Sequential([
         Conv2D(32, (3, 3), input_shape=(input_size, input_size, 1), activation='ReLU'),
@@ -34,7 +31,7 @@ def ocr(filepath="./models", epochs=12):
         MaxPool2D(pool_size=(2, 2)),
         Flatten(),
         Dense(units=128, activation='ReLU'),
-        Dropout(0.2),
+        Dropout(0.3),
         Dense(units=len(result_arr), activation='sigmoid')
     ])
 
@@ -57,18 +54,27 @@ def ocr(filepath="./models", epochs=12):
     # Preprocess data
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.transpose(tf.image.resize(image, (input_size, input_size))), label)) \
+        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
+        .map(lambda image, label: (tf.image.transpose(image), label)) \
         .cache() \
         .shuffle(int(ds_info.splits['train'].num_examples / ds_info.splits['train'].num_shards)) \
         .batch(batch_size) \
         .prefetch(tf.data.AUTOTUNE)
+    # .map(lambda image, label: (image, label)) \
 
     test_ds = test_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.transpose(tf.image.resize(image, (input_size, input_size))), label)) \
+        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
+        .map(lambda image, label: (tf.image.transpose(image), label)) \
         .cache() \
         .batch(batch_size) \
         .prefetch(tf.data.AUTOTUNE)
+
+    # for img, lbl in train_ds.take(1):
+    #     for i in range(32):
+    #         plt.imshow(img[i])
+    #         plt.title(result_arr[lbl[i].numpy()])
+    #         plt.show()
 
     # Train model
     ocr_model.fit(

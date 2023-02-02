@@ -9,7 +9,7 @@ from generateModel_OCR import ocr, input_size, result_arr
 
 model_dir = "./models/ocr"
 data_dir = "./datasets"
-test_img_dir = "./test_images/tesseract_sample.jpg"
+test_img_dir = "./test_images/simple_test_img.png"
 batch_size = 16
 
 
@@ -36,14 +36,15 @@ def pad_resize(orig_image):
     # Pad image to get to final size
     img = tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
 
+    img = tf.cast(img, tf.float32) / 255.
+
     return img
 
 
 def predict(input_img, ocr_model):
-    img = input_img.copy()
-
+    ref_img = input_img.copy()
     # Filter images for better analysis
-    blur = cv2.bilateralFilter(img, 9, 75, 75)
+    blur = cv2.bilateralFilter(ref_img, 9, 75, 75)
     _, thresh = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY)
 
     # Get a box around each letter
@@ -55,8 +56,8 @@ def predict(input_img, ocr_model):
         avg_area += (w * h)
 
     # TODO: Does this value need to change depending on the image?
-    margin = 0.95
-    avg_area /= len(contours)
+    margin = 0.5
+    avg_area /= (len(contours) * 2)
     max_area = (1 + margin) * avg_area
     min_area = (1 - margin) * avg_area
     i = 0
@@ -68,17 +69,20 @@ def predict(input_img, ocr_model):
         # If the box is "character-sized" then run it through the model
         if max_area > w * h > min_area:
 
-            char_img = pad_resize(img[y:y + h, x:x + w])
+            # Crop the image using the data from the contours
+            char_img = pad_resize(ref_img[y:y + h, x:x + w])
 
-            # Make sure the picture isn't blank
+            # Make sure the cropped image isn't blank
             if np.amax(char_img) == np.amin(char_img):
                 return 0
 
             # Add 3rd axis for model input
-            test_image = np.expand_dims(char_img, axis=0)
+            model_input = np.expand_dims(char_img, axis=0)
 
             # Process image
-            result = ocr_model.predict(test_image)[0]
+            result = ocr_model.predict(model_input)[0]
+
+            char_predictions = [result_arr[x] for x in np.where(result > 0.0)[0]]
 
             # Get the highest prediction
             index = np.where(result == np.amax(result))
@@ -87,14 +91,19 @@ def predict(input_img, ocr_model):
             if pred is None:
                 continue
 
+            if not len(char_predictions):
+                plt.imshow(char_img, cmap=plt.cm.binary)
+                plt.title(f"Fig {i}, Prediction: None, Size: {w * h}")
+                plt.show()
+                plt.pause(0.5)
+                continue
+
             plt.imshow(char_img, cmap=plt.cm.binary)
             plt.title(f"Fig {i}, Prediction: {result_arr[pred]}, Size: {w * h}")
             plt.show()
             plt.pause(0.5)
-            for i in range(len(result)):
-                if result[i] > 0.0:
-                    print(result_arr[i])
-            print('\n')
+            print(f"Prediction: {result_arr[pred]}")
+            print(f"Could be: {char_predictions.remove(result_arr[pred])}")
         i += 1
 
 
@@ -120,4 +129,4 @@ def main(new_model=False, epochs=3):
 
 
 if __name__ == "__main__":
-    main(True)
+    main()
