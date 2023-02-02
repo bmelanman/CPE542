@@ -2,7 +2,9 @@ import tensorflow as tf
 import tensorflow_datasets as tf_ds
 
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
+from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
+
+import matplotlib.pyplot as plt
 
 models_dir = "./models/ocr"
 batch_size = 32
@@ -27,12 +29,12 @@ def ocr(filepath="./models", epochs=12):
     # Creating the CNN model
     ocr_model = Sequential([
         Conv2D(32, (3, 3), input_shape=(input_size, input_size, 1), activation='ReLU'),
-        MaxPooling2D(pool_size=(2, 2)),
+        MaxPool2D(pool_size=(2, 2)),
         Conv2D(32, (3, 3), activation='ReLU'),
-        MaxPooling2D(pool_size=(2, 2)),
+        MaxPool2D(pool_size=(2, 2)),
         Flatten(),
         Dense(units=128, activation='ReLU'),
-        Dropout(0.5),
+        Dropout(0.2),
         Dense(units=len(result_arr), activation='sigmoid')
     ])
 
@@ -55,15 +57,15 @@ def ocr(filepath="./models", epochs=12):
     # Preprocess data
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
+        .map(lambda image, label: (tf.image.transpose(tf.image.resize(image, (input_size, input_size))), label)) \
         .cache() \
-        .shuffle(ds_info.splits['train'].num_examples) \
+        .shuffle(int(ds_info.splits['train'].num_examples / ds_info.splits['train'].num_shards)) \
         .batch(batch_size) \
         .prefetch(tf.data.AUTOTUNE)
 
     test_ds = test_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
+        .map(lambda image, label: (tf.image.transpose(tf.image.resize(image, (input_size, input_size))), label)) \
         .cache() \
         .batch(batch_size) \
         .prefetch(tf.data.AUTOTUNE)

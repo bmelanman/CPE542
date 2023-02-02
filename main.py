@@ -9,7 +9,7 @@ from generateModel_OCR import ocr, input_size, result_arr
 
 model_dir = "./models/ocr"
 data_dir = "./datasets"
-test_img_dir = "./test_images/sample_hsf.jpg"
+test_img_dir = "./test_images/tesseract_sample.jpg"
 batch_size = 16
 
 
@@ -55,7 +55,7 @@ def predict(input_img, ocr_model):
         avg_area += (w * h)
 
     # TODO: Does this value need to change depending on the image?
-    margin = 0.8
+    margin = 0.95
     avg_area /= len(contours)
     max_area = (1 + margin) * avg_area
     min_area = (1 - margin) * avg_area
@@ -78,11 +78,11 @@ def predict(input_img, ocr_model):
             test_image = np.expand_dims(char_img, axis=0)
 
             # Process image
-            result = ocr_model.predict(test_image)
+            result = ocr_model.predict(test_image)[0]
 
             # Get the highest prediction
             index = np.where(result == np.amax(result))
-            pred = index[1][0]
+            pred = index[0][0]
 
             if pred is None:
                 continue
@@ -91,12 +91,10 @@ def predict(input_img, ocr_model):
             plt.title(f"Fig {i}, Prediction: {result_arr[pred]}, Size: {w * h}")
             plt.show()
             plt.pause(0.5)
-            real = input("Actual value? ")
-            try:
-                idx = result_arr.index(real)
-                print(result[0][idx], '\n')
-            except ValueError:
-                pass
+            for i in range(len(result)):
+                if result[i] > 0.0:
+                    print(result_arr[i])
+            print('\n')
         i += 1
 
 
@@ -122,4 +120,4 @@ def main(new_model=False, epochs=3):
 
 
 if __name__ == "__main__":
-    main()
+    main(True)
