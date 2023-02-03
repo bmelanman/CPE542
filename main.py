@@ -20,6 +20,20 @@ def sort_contours(cnts):
     return cnts
 
 
+def remove_outliers(arr, outlier_const):
+    np_arr = np.array(arr)
+    upper_quartile = np.percentile(np_arr, 75)
+    lower_quartile = np.percentile(np_arr, 25)
+    iqr = (upper_quartile - lower_quartile) * outlier_const
+    quart_set = (lower_quartile - iqr, upper_quartile + iqr)
+    resultList = []
+    for ele in np_arr:
+        if quart_set[0] <= ele <= quart_set[1]:
+            resultList.append(ele)
+    print(min(resultList), max(resultList))
+    return resultList
+
+
 def pad_resize(orig_image):
     # Arbitrary border width
     border_width = 6
@@ -42,33 +56,29 @@ def pad_resize(orig_image):
 
 
 def predict(input_img, ocr_model):
+
     ref_img = input_img.copy()
+
     # Filter images for better analysis
     blur = cv2.bilateralFilter(ref_img, 9, 75, 75)
-    _, thresh = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY)
+    thresh = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
     # Get a box around each letter
     contours, _ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-    avg_area = 0
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        avg_area += (w * h)
+    cnt_area = [cv2.contourArea(cnt) for cnt in contours]
 
     # TODO: Does this value need to change depending on the image?
-    margin = 0.5
-    avg_area /= (len(contours) * 2)
-    max_area = (1 + margin) * avg_area
-    min_area = (1 - margin) * avg_area
+    avg_area = remove_outliers(cnt_area, 2)
+
     i = 0
     for cnt in contours:
+        i += 1
+
         # Get the contour bounds as [x, y, w, h]
         x, y, w, h = cv2.boundingRect(cnt)
-        print(max_area, w * h, min_area)
 
-        # If the box is "character-sized" then run it through the model
-        if max_area > w * h > min_area:
-
+        if cv2.contourArea(cnt) in avg_area:
             # Crop the image using the data from the contours
             char_img = pad_resize(ref_img[y:y + h, x:x + w])
 
@@ -90,8 +100,7 @@ def predict(input_img, ocr_model):
 
             if pred is None:
                 continue
-
-            if not len(char_predictions):
+            elif not len(char_predictions):
                 plt.imshow(char_img, cmap=plt.cm.binary)
                 plt.title(f"Fig {i}, Prediction: None, Size: {w * h}")
                 plt.show()
@@ -104,7 +113,6 @@ def predict(input_img, ocr_model):
             plt.pause(0.5)
             print(f"Prediction: {result_arr[pred]}")
             print(f"Could be: {char_predictions.remove(result_arr[pred])}")
-        i += 1
 
 
 def main(new_model=False, epochs=3):
