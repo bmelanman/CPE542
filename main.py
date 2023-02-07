@@ -5,11 +5,13 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
+import segment
 from generateModel_OCR import ocr, input_size, result_arr
 
 model_dir = "./models/ocr"
 data_dir = "./datasets"
-img_dir_arr = ["letter_c.png", "simple_test_img.png", "tesseract_sample.jpg"]
+img_dir_arr = ["simple_test_img.png", "tesseract_sample.jpg", "letter_c.png"]
 batch_size = 16
 
 
@@ -59,26 +61,16 @@ def remove_outliers(arr, outlier_const):
     return resultList
 
 
-def pad_resize(orig_image):
-    # Arbitrary border width
-    border_width = 3
-    # New image size based off border width
-    new_img_size = input_size - (border_width * 2)
+def new_predict(img_in, model):
+    letters = segment.letters_extract(img_in)
 
-    # Add 3rd dimension for resize and model input
-    img = np.expand_dims(orig_image, axis=2)
-    # Invert because resize pads with 0's
-    img = np.invert(img)
+    prediction = model.predict(letters)
 
-    # Resize image to new size
-    img = tf.image.resize(img, (new_img_size, new_img_size), preserve_aspect_ratio=True)
-    # Pad image to get to final size
-    img = tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
-
-    # Normalize image
-    img = tf.cast(img, tf.float32) / 255.
-
-    return img
+    for i in range(len(letters)):
+        plt.imshow(letters[i])
+        plt.title(f"Prediction: {result_arr[np.argmax(prediction[i])]}")
+        plt.show()
+        plt.pause(0.2)
 
 
 def predict(input_img, ocr_model):
@@ -151,9 +143,9 @@ def main(new_model=False, epochs=3):
     for img in img_dir_arr:
         print(f"Testing {img}...")
         # Load a single PNG containing multiple characters into a CV2 Mat
-        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_GRAYSCALE)
+        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_UNCHANGED)
         # Use model to predict the contents of the image
-        predict(test_image, ocr_model)
+        new_predict(test_image, ocr_model)
         # return
 
 
