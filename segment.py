@@ -1,9 +1,25 @@
 import cv2
+import numpy as np
+
+
+def check_dark_background(input_img):
+
+    avg_color_row = np.average(input_img, axis=0)
+    avg_color = np.average(avg_color_row, axis=0)
+
+    if avg_color < 50:
+        return True
+
+    return False
 
 
 def letters_extract(image_file):
     img = cv2.imread(image_file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    if check_dark_background(gray):
+        gray = cv2.bitwise_not(gray)
+
     blur = cv2.bilateralFilter(gray, 9, 75, 75)
     ret, thresh = cv2.threshold(blur, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
