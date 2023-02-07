@@ -9,7 +9,7 @@ from generateModel_OCR import ocr, input_size, result_arr
 
 model_dir = "./models/ocr"
 data_dir = "./datasets"
-test_img_dir = "./test_images/simple_test_img.png"
+img_dir_arr = ["letter_c.png", "simple_test_img.png", "tesseract_sample.jpg"]
 batch_size = 16
 
 
@@ -20,23 +20,48 @@ def sort_contours(cnts):
     return cnts
 
 
+def disp_result(char_img, result, i):
+    char_predictions = [result_arr[x] for x in np.where(result > 0.0)[0]]
+
+    # Get the highest prediction
+    index = np.where(result == np.amax(result))
+    pred = index[0][0]
+
+    if pred is None:
+        return
+    elif not len(char_predictions):
+        plt.imshow(char_img, cmap=plt.cm.binary)
+        plt.title(f"Fig: {i}, Prediction: None")
+        plt.show()
+        plt.pause(0.5)
+        return
+
+    plt.imshow(char_img, cmap=plt.cm.binary)
+    plt.title(f"Fig: {i}, Prediction: {result_arr[pred]}")
+    plt.show()
+    plt.pause(0.5)
+
+
 def remove_outliers(arr, outlier_const):
     np_arr = np.array(arr)
+
     upper_quartile = np.percentile(np_arr, 75)
     lower_quartile = np.percentile(np_arr, 25)
+
     iqr = (upper_quartile - lower_quartile) * outlier_const
     quart_set = (lower_quartile - iqr, upper_quartile + iqr)
+
     resultList = []
     for ele in np_arr:
         if quart_set[0] <= ele <= quart_set[1]:
             resultList.append(ele)
-    print(min(resultList), max(resultList))
+
     return resultList
 
 
 def pad_resize(orig_image):
     # Arbitrary border width
-    border_width = 6
+    border_width = 3
     # New image size based off border width
     new_img_size = input_size - (border_width * 2)
 
@@ -50,13 +75,13 @@ def pad_resize(orig_image):
     # Pad image to get to final size
     img = tf.image.pad_to_bounding_box(img, border_width, border_width, input_size, input_size)
 
+    # Normalize image
     img = tf.cast(img, tf.float32) / 255.
 
     return img
 
 
 def predict(input_img, ocr_model):
-
     ref_img = input_img.copy()
 
     # Filter images for better analysis
@@ -64,55 +89,47 @@ def predict(input_img, ocr_model):
     thresh = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
     # Get a box around each letter
-    contours, _ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours = contours[0] if len(contours) == 2 else contours[1]
 
-    cnt_area = [cv2.contourArea(cnt) for cnt in contours]
+    contours = sort_contours(contours)
+
+    # Calculate the area of each contour
+    contours_area = [cv2.contourArea(cnt) for cnt in contours]
 
     # TODO: Does this value need to change depending on the image?
-    avg_area = remove_outliers(cnt_area, 2)
+    # Remove any statistical outliers
+    avg_cnt_area = remove_outliers(contours_area, 3)
 
     i = 0
     for cnt in contours:
+
+        if i == 30:
+            return
         i += 1
+
+        cnt_area = cv2.contourArea(cnt)
 
         # Get the contour bounds as [x, y, w, h]
         x, y, w, h = cv2.boundingRect(cnt)
 
-        if cv2.contourArea(cnt) in avg_area:
+        if cnt_area in avg_cnt_area:
             # Crop the image using the data from the contours
             char_img = pad_resize(ref_img[y:y + h, x:x + w])
 
             # Make sure the cropped image isn't blank
             if np.amax(char_img) == np.amin(char_img):
-                return 0
+                return
 
             # Add 3rd axis for model input
             model_input = np.expand_dims(char_img, axis=0)
 
-            # Process image
+            # Predict image
             result = ocr_model.predict(model_input)[0]
+            tf.function.__call__()
 
-            char_predictions = [result_arr[x] for x in np.where(result > 0.0)[0]]
-
-            # Get the highest prediction
-            index = np.where(result == np.amax(result))
-            pred = index[0][0]
-
-            if pred is None:
-                continue
-            elif not len(char_predictions):
-                plt.imshow(char_img, cmap=plt.cm.binary)
-                plt.title(f"Fig {i}, Prediction: None, Size: {w * h}")
-                plt.show()
-                plt.pause(0.5)
-                continue
-
-            plt.imshow(char_img, cmap=plt.cm.binary)
-            plt.title(f"Fig {i}, Prediction: {result_arr[pred]}, Size: {w * h}")
-            plt.show()
-            plt.pause(0.5)
-            print(f"Prediction: {result_arr[pred]}")
-            print(f"Could be: {char_predictions.remove(result_arr[pred])}")
+            # Display the image and prediction for verification
+            disp_result(char_img, result, i)
 
 
 def main(new_model=False, epochs=3):
@@ -130,10 +147,14 @@ def main(new_model=False, epochs=3):
 
     # Test the network
     print("Testing model...")
-    # Load a single PNG containing multiple characters into a CV2 Mat
-    test_image = cv2.imread(test_img_dir, cv2.IMREAD_GRAYSCALE)
-    # Use model to predict the contents of the image
-    predict(test_image, ocr_model)
+
+    for img in img_dir_arr:
+        print(f"Testing {img}...")
+        # Load a single PNG containing multiple characters into a CV2 Mat
+        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_GRAYSCALE)
+        # Use model to predict the contents of the image
+        predict(test_image, ocr_model)
+        # return
 
 
 if __name__ == "__main__":

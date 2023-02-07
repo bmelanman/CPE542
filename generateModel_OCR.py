@@ -4,9 +4,11 @@ import tensorflow_datasets as tf_ds
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 
+import matplotlib.pyplot as plt
+
 models_dir = "./models/ocr"
 batch_size = 32
-input_size = 64
+input_size = 28
 
 result_arr = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  # Numbers
@@ -46,7 +48,6 @@ def ocr(filepath="./models", epochs=12):
     (train_ds, test_ds), ds_info = tf_ds.load(
         'emnist',
         split=['train', 'test'],
-        shuffle_files=True,
         as_supervised=True,
         with_info=True
     )
@@ -54,39 +55,55 @@ def ocr(filepath="./models", epochs=12):
     # Preprocess data
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
         .map(lambda image, label: (tf.image.transpose(image), label)) \
-        .cache() \
         .shuffle(int(ds_info.splits['train'].num_examples / ds_info.splits['train'].num_shards)) \
         .batch(batch_size) \
-        .prefetch(tf.data.AUTOTUNE)
+        .prefetch(tf.data.AUTOTUNE) \
+        .cache()
+    # .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
     # .map(lambda image, label: (image, label)) \
 
     test_ds = test_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
         .map(lambda image, label: (tf.image.transpose(image), label)) \
-        .cache() \
         .batch(batch_size) \
-        .prefetch(tf.data.AUTOTUNE)
+        .prefetch(tf.data.AUTOTUNE) \
+        .cache()
+    # .map(lambda image, label: (tf.image.resize(image, (input_size, input_size)), label)) \
 
-    # for img, lbl in train_ds.take(1):
-    #     for i in range(32):
-    #         plt.imshow(img[i])
-    #         plt.title(result_arr[lbl[i].numpy()])
-    #         plt.show()
+    for img, lbl in train_ds.take(1):
+        for i in range(32):
+            plt.imshow(img[i], cmap=plt.cm.binary)
+            plt.title(result_arr[lbl[i].numpy()])
+            plt.show()
+
+    input("Press any key to begin training... ")
 
     # Train model
+    print("Training Model...")
     ocr_model.fit(
         train_ds,
+        shuffle=True,
         epochs=epochs,
         validation_data=test_ds,
+        validation_batch_size=batch_size
     )
+    print("Done training!\n")
+
+    print("Testing model...")
+    test_results = ocr_model.evaluate(
+        test_ds,
+        batch_size=batch_size
+    )
+    print("Done testing!")
+    print(f"Testing accuracy: {(test_results[1] * 100):.2f}% \n")
 
     # Save the model for later use
+    print("Saving Model...")
     ocr_model.save(
         filepath=filepath,
     )
+    print("Saved! Model generation is complete. \n")
 
 
 if __name__ == "__main__":
