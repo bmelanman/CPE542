@@ -23,7 +23,7 @@ def pad_resize(orig_image):
     # Arbitrary border width
     border_width = 2
     # New image size based off border width
-    new_img_size = input_size - (border_width * 2)
+    img_resize = input_size - (border_width * 2)
 
     # Add 3rd dimension for resize and model input
     expand = np.expand_dims(orig_image, axis=2)
@@ -31,9 +31,20 @@ def pad_resize(orig_image):
     invert = np.invert(expand)
 
     # Resize image to new size
-    resize = tf.image.resize(invert, (new_img_size, new_img_size), preserve_aspect_ratio=True)
+    resize = tf.image.resize(invert, (img_resize, img_resize), preserve_aspect_ratio=True)
+
+    # Padding size to center the image
+    img_shape = resize.shape
+
+    if img_shape[1] != img_resize:
+        x_pad = int((img_resize - img_shape[1]) / 2) + border_width
+        y_pad = border_width
+    else:
+        x_pad = border_width
+        y_pad = int((img_resize - img_shape[0]) / 2) + border_width
+
     # Pad image to get to final size
-    pad = tf.image.pad_to_bounding_box(resize, border_width, border_width, input_size, input_size)
+    pad = tf.image.pad_to_bounding_box(resize, y_pad, x_pad, input_size, input_size)
 
     # Normalize image
     normalize = tf.cast(pad, tf.float32) / 255.
@@ -51,7 +62,7 @@ def letters_extract(gray_img):
 
     # Apply blur and adaptive threshold filter to help finding characters
     blured = cv2.blur(gray_img, (5, 5), 0)
-    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 13, 2)
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
     ret, thresh = cv2.threshold(gray_img, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
