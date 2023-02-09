@@ -22,7 +22,9 @@ def predict(ocr_model, image):
         plt.imshow(letter, cmap=plt.cm.binary)
         plt.title(f"Prediction: {result_arr[np.argmax(prediction[idx])]}")
         plt.show()
-        plt.pause(0.2)
+        plt.pause(0.25)
+        if idx > 20:
+            break
 
 
 def main(new_model=False, epochs=12):
@@ -46,7 +48,7 @@ def main(new_model=False, epochs=12):
     print("Model loaded!\n")
 
     # Images to test
-    img_dir_arr = ["tesseract_sample.jpg"]
+    img_dir_arr = ["this_is_a_test.png"]
 
     # Test the network
     print("Testing model...")
@@ -61,4 +63,4 @@ def main(new_model=False, epochs=12):
 
 
 if __name__ == "__main__":
-    main(True, epochs=3)
+    main()
