@@ -1,10 +1,7 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import tensorflow as tf
 
-from generate_ocr import input_size
-from segment import pad_resize
+from main import predict
 
 
 def gaussian_diff_filter(gray_img, kernel1, kernel2):
@@ -40,9 +37,85 @@ def blur_filter(gray_img):
     cv2.waitKey()
 
 
-if __name__ == "__main__":
-    gray = cv2.imread("./test_images/performance.png", cv2.IMREAD_GRAYSCALE)
+def sentence_extract(img):
 
-    gaussian_diff_filter(gray, 15, 31)
-    blur_filter(gray)
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Apply blur and adaptive threshold filter to help finding characters
+    # blured = cv2.blur(gray_img, (5, 5), 0)
+    # adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
+
+    # blur = cv2.bilateralFilter(gray, 9, 75, 75)
+    # ret, thresh = cv2.threshold(blur, 190, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    #
+    # # Use findContours to get locations of characters
+    # cnts, heirs = cv2.findContours(thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    lower = np.array([0, 0, 218])
+    upper = np.array([157, 54, 255])
+
+    mask = cv2.inRange(hsv, lower, upper)
+
+    # Create horizontal kernel and dilate to connect text characters
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 3))
+    dilate = cv2.dilate(mask, kernel, iterations=5)
+
+    cnts, heirs = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Sort the contours by box location
+    bxs = [cv2.boundingRect(c) for c in cnts]
+    boxes, hierarchies = zip(*sorted(zip(bxs, heirs[0]), key=lambda b: b, reverse=False))
+
+    result = 255 - cv2.bitwise_and(dilate, mask)
+
+    # Iterate through the list of sorted contours
+    for idx, box in enumerate(boxes):
+        (x1, y1, w, h) = box
+        cv2.rectangle(img, (x1, y1), (x1 + w, y1 + h), (255, 0, 0))  # BGR
+
+        sentence = result[y1:y1 + h, x1:x1 + w]
+
+        '''
+        Begin sentence to character parsing
+        '''
+
+        blured = cv2.blur(sentence, (5, 5), 0)
+        # blured = cv2.bilateralFilter(sentence, 9, 75, 75)
+        adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 13, 2)
+
+        # Use findContours to get locations of characters
+        cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Sort the contours by box location
+        bxs = [cv2.boundingRect(c) for c in cnts]
+        boxes, hierarchies = zip(*sorted(zip(bxs, heirs[0]), reverse=False))
+
+        # Iterate through the list of sorted contours
+        for i, bx in enumerate(boxes):
+
+            # If a contour has a child, assume it's a letter
+            if hierarchies[i][3] != -1:
+                (x2, y2, w, h) = bx
+                x2 += x1
+                y2 += y1
+                cv2.rectangle(img, (x2, y2), (x2 + w, y2 + h), (0, 0, 255))  # BGR
+
+    cv2.imshow('img', img)
+    cv2.waitKey()
+
+
+if __name__ == "__main__":
+    image = cv2.imread("./test_images/this_is_a_test.png", cv2.IMREAD_UNCHANGED)
+
+    sentence_extract(image)
+
+    # for ltrs in snts:
+    #     for i, ltr in enumerate(ltrs):
+    #         print(f"Image {i + 1}")
+    #         plt.imshow(ltr, cmap=plt.cm.binary)
+    #         plt.show()
+    #         plt.pause(0.2)
+
     cv2.destroyAllWindows()

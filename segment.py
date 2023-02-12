@@ -83,7 +83,7 @@ def letters_extract(gray_img):
             (x, y, w, h) = box
             letter_crop = thresh[y:y + h, x:x + w]
             letter_resize = pad_resize(letter_crop)
-            letter_blur = cv2.bilateralFilter(letter_resize, 5, 0, 0)
+            letter_blur = cv2.bilateralFilter(letter_resize, 2, 0, 0)
             letters.append(letter_blur)
 
     return np.stack(letters)
