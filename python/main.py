@@ -30,7 +30,7 @@ def predict(ocr_model, image):
 def main(new_model=False, epochs=12):
 
     # Directory containing a pre-generated model
-    model_dir = "./models/ocr"
+    model_dir = "../models/ocr"
 
     # Check if the directory exists
     if not os.path.isdir(model_dir):

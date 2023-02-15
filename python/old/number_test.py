@@ -11,7 +11,7 @@ from keras import layers
 import plot_results as my_plt
 import random as r
 
-models_dir = "../models"
+models_dir = "../../models"
 dataset_dir = "../datasets"
 batch_size = 32
 

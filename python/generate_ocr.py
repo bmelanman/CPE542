@@ -106,7 +106,7 @@ if __name__ == "__main__":
         Dense(output_shape, activation='sigmoid')
     ])
 
-    generate_ocr_model(filepath="./models/", epochs=12, model=ocr_model)
+    generate_ocr_model(filepath="../models/", epochs=12, model=ocr_model)
 
     # model_0 = Sequential([
     #     Conv2D(32, (3, 3), input_shape=input_shape, activation='ReLU'),
