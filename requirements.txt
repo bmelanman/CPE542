@@ -1,5 +1,8 @@
 ###### Requirements without Version Specifiers ######
 tensorflow-datasets
+opencv-python
+matplotlib
+numpy
 
 ###### Requirements with Version Specifiers ######
 tensorflow-macos == 2.10.0

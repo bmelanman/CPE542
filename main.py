@@ -56,7 +56,7 @@ def main(new_model=False, epochs=12):
         print(f"Testing {img}...")
 
         # Load an image in grayscale format
-        test_image = cv2.imread("../test_images/" + img, cv2.IMREAD_GRAYSCALE)
+        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_GRAYSCALE)
 
         # Use model to predict the contents of the image
         predict(ocr_model, test_image)
