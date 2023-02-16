@@ -1,0 +1,7 @@
+###### Requirements without Version Specifiers ######
+tensorflow-datasets
+
+###### Requirements with Version Specifiers ######
+tensorflow-macos == 2.10.0
+tensorflow-metal == 0.6.0
+keras == 2.10.0

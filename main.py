@@ -30,7 +30,7 @@ def predict(ocr_model, image):
 def main(new_model=False, epochs=12):
 
     # Directory containing a pre-generated model
-    model_dir = "../models/ocr"
+    model_dir = "models/ocr"
 
     # Check if the directory exists
     if not os.path.isdir(model_dir):
@@ -48,7 +48,7 @@ def main(new_model=False, epochs=12):
     print("Model loaded!\n")
 
     # Images to test
-    img_dir_arr = ["this_is_a_test.png"]
+    img_dir_arr = ["performance.png"]
 
     # Test the network
     print("Testing model...")
@@ -56,7 +56,7 @@ def main(new_model=False, epochs=12):
         print(f"Testing {img}...")
 
         # Load an image in grayscale format
-        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_GRAYSCALE)
+        test_image = cv2.imread("../test_images/" + img, cv2.IMREAD_GRAYSCALE)
 
         # Use model to predict the contents of the image
         predict(ocr_model, test_image)
