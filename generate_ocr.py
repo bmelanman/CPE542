@@ -2,7 +2,8 @@ import tensorflow as tf
 import tensorflow_datasets as tf_ds
 
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
+from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout, Input, Lambda
+import random
 
 batch_size = 16
 input_size = 28
@@ -24,19 +25,26 @@ def normalize_img(image, label):
     return tf.cast(image, tf.float32) / 255., label
 
 
-def generate_ocr_model(filepath, epochs, model=None):
-    if model is None:
-        # Creating the CNN model
-        model = Sequential([
-            Conv2D(32, (3, 3), input_shape=input_shape, activation='ReLU'),
-            MaxPool2D(pool_size=(2, 2)),
-            Conv2D(32, (3, 3), activation='ReLU'),
-            MaxPool2D(pool_size=(2, 2)),
-            Flatten(),
-            Dense(units=128, activation='ReLU'),
-            Dropout(0.3),
-            Dense(units=len(result_arr), activation='sigmoid')
-        ])
+def random_rotate(image):
+
+    return tf.image.rot90(image, random.choice([0, 1, 2, 3]))
+
+
+def generate_ocr_model(filepath, epochs):
+    # Creating the CNN model
+    model = Sequential([
+        Input(input_shape),
+        # Lambda(lambda img: random_rotate(img)),
+        Conv2D(32, (3, 3), activation='relu'),
+        MaxPool2D((2, 2)),
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPool2D((2, 2)),
+        Conv2D(128, (3, 3), activation='relu'),
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.5),
+        Dense(output_shape, activation='sigmoid')
+    ])
 
     # Compile the model
     model.compile(
@@ -58,15 +66,16 @@ def generate_ocr_model(filepath, epochs, model=None):
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
         .map(lambda image, label: (tf.image.transpose(image), label)) \
-        .shuffle(int(ds_info.splits['train'].num_examples / ds_info.splits['train'].num_shards)) \
-        .prefetch(tf.data.AUTOTUNE) \
-        .cache()
+        .shuffle(1000) \
+        .prefetch(tf.data.AUTOTUNE)
 
     test_ds = test_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
         .map(lambda image, label: (tf.image.transpose(image), label)) \
-        .prefetch(tf.data.AUTOTUNE) \
-        .cache()
+        .prefetch(tf.data.AUTOTUNE)
+
+    train_ds = train_ds.cache()
+    test_ds = test_ds.cache()
 
     model.summary()
 
@@ -76,7 +85,6 @@ def generate_ocr_model(filepath, epochs, model=None):
     print("Training Model...")
     model.fit(
         train_ds,
-        shuffle=True,
         epochs=epochs,
         validation_data=test_ds,
     )
@@ -84,26 +92,14 @@ def generate_ocr_model(filepath, epochs, model=None):
 
     # Save the model for later use
     print("Saving Model...")
-    ocr_model.save(
+    model.save(
         filepath=filepath,
     )
     print("Saved! Model generation is complete. \n")
 
 
 if __name__ == "__main__":
-    ocr_model = Sequential([
-        Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
-        MaxPool2D((2, 2)),
-        Conv2D(64, (3, 3), activation='relu'),
-        MaxPool2D((2, 2)),
-        Conv2D(128, (3, 3), activation='relu'),
-        Flatten(),
-        Dense(128, activation='relu'),
-        Dropout(0.5),
-        Dense(62, activation='softmax')
-    ])
-
-    generate_ocr_model(filepath="models/", epochs=12, model=ocr_model)
+    generate_ocr_model(filepath="models/", epochs=2)
 
     # model_0 = Sequential([
     #     Conv2D(32, (3, 3), input_shape=input_shape, activation='ReLU'),
