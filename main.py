@@ -39,11 +39,15 @@ def camera_input():
         # Convert to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+        if not frame.any():
+            print("Cannot read from video source!")
+            continue
+
         # Display the resulting frame
         cv2.imshow('frame', gray)
 
         # Trigger display
-        u_input = cv2.waitKey(10)
+        u_input = cv2.waitKey(1000)
 
         if u_input == ord('c') or u_input == ord('q'):
             break
