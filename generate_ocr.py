@@ -32,10 +32,24 @@ def random_rotate(image):
 
 def generate_ocr_model(filepath, epochs):
     # Creating the CNN model
-    model = Sequential([
-        Input(input_shape),
-        # Lambda(lambda img: random_rotate(img)),
-        Conv2D(32, (3, 3), activation='relu'),
+
+    # model = Sequential([
+    #     Input(input_shape),
+    #     # Lambda(lambda img: random_rotate(img)),
+    #     Conv2D(32, (3, 3), activation='relu'),
+    #     MaxPool2D((2, 2)),
+    #     Conv2D(64, (3, 3), activation='relu'),
+    #     MaxPool2D((2, 2)),
+    #     Conv2D(128, (3, 3), activation='relu'),
+    #     Flatten(),
+    #     Dense(128, activation='relu'),
+    #     Dropout(0.5),
+    #     Dense(output_shape, activation='sigmoid')
+    # ])
+
+    # ChatGPT Model
+    model = tf.keras.Sequential([
+        Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
         MaxPool2D((2, 2)),
         Conv2D(64, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
@@ -43,7 +57,7 @@ def generate_ocr_model(filepath, epochs):
         Flatten(),
         Dense(128, activation='relu'),
         Dropout(0.5),
-        Dense(output_shape, activation='sigmoid')
+        Dense(62, activation='softmax')
     ])
 
     # Compile the model

@@ -2,7 +2,6 @@ import os.path
 import keras
 import cv2
 import numpy as np
-import time
 
 import matplotlib.pyplot as plt
 
@@ -11,7 +10,6 @@ from generate_ocr import generate_ocr_model, result_arr
 
 
 def predict(ocr_model, image):
-
     # Convert the image into a list of characters in image format
     characters = segment.letters_extract(image)
 
@@ -29,21 +27,11 @@ def predict(ocr_model, image):
 
 
 def camera_input():
-
-    # User input flags
-    q_flag = 0
-    c_flag = 0
-
-    # Refresh rate in seconds
-    refresh_rate = 1
-
     # Define camera input
     vid = cv2.VideoCapture(0)
 
     # Display the camera output at the specified framerate
     while True:
-        # Refresh rate calculation
-        t_end = time.time() + refresh_rate
 
         # Capture a video frame
         ret, frame = vid.read()
@@ -55,22 +43,9 @@ def camera_input():
         cv2.imshow('frame', gray)
 
         # Trigger display
-        cv2.waitKey(1)
+        u_input = cv2.waitKey(10)
 
-        # Loop to wait for next refresh
-        while time.time() < t_end:
-
-            # Quit button
-            if 0xFF == ord('q'):
-                q_flag = 1
-                break
-
-            # Capture button
-            if 0xFF == ord('c'):
-                c_flag = 1
-                break
-
-        if q_flag or c_flag:
+        if u_input == ord('c') or u_input == ord('q'):
             break
 
     # After the loop release the cap object
@@ -78,14 +53,13 @@ def camera_input():
     # Destroy all the windows
     cv2.destroyAllWindows()
 
-    if c_flag:
-        return frame
-
-    return 0
+    if u_input == ord('c'):
+        return gray
+    else:
+        return np.zeros((1, 1, 1), dtype="uint8")
 
 
 def main(new_model=False, epochs=12, camera=False):
-
     # Directory containing a pre-generated model
     model_dir = "models/ocr"
 
@@ -106,11 +80,11 @@ def main(new_model=False, epochs=12, camera=False):
 
     if camera:
         test_image = camera_input()
-        if test_image == 0:
+        if test_image.any():
+            print("Capture received!")
+        else:
             print("Quit input detected, Goodbye!")
             return 0
-        else:
-            print("Capture received!")
     else:
         # Image to test
         img = "performance.png"

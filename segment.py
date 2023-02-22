@@ -5,6 +5,13 @@ import tensorflow as tf
 
 from generate_ocr import input_size
 
+# Drawing contours
+DRAW_ALL_CNTS = -1
+# Arbitrary border width
+border_width = 2
+# New image size based off border width
+img_resize = input_size - (border_width * 2)
+
 
 def check_dark_background(input_img):
     # image grayscale and filtering
@@ -20,10 +27,6 @@ def check_dark_background(input_img):
 
 
 def pad_resize(orig_image):
-    # Arbitrary border width
-    border_width = 2
-    # New image size based off border width
-    img_resize = input_size - (border_width * 2)
 
     # Add 3rd dimension for resize and model input
     expand = np.expand_dims(orig_image, axis=2)
@@ -43,6 +46,19 @@ def pad_resize(orig_image):
         x_pad = border_width
         y_pad = int((img_resize - img_shape[0]) / 2) + border_width
 
+    if x_pad < 1 or y_pad < 1:
+        print(
+            f"ERR: PAD LESS THAN ONE!\n"
+            f"x_pad: {x_pad}\n"
+            f"x_pad: {img_shape[1]}\n"
+            f"x_pad: {y_pad}\n"
+            f"x_pad: {img_shape[0]}\n"
+        )
+        if x_pad < 1:
+            x_pad = 1
+        else:
+            y_pad = 1
+
     # Pad image to get to final size
     pad = tf.image.pad_to_bounding_box(resize, y_pad, x_pad, input_size, input_size)
 
@@ -53,7 +69,6 @@ def pad_resize(orig_image):
 
 
 def letters_extract(gray_img):
-
     # The input image should already be grayscale!
 
     # Check if the image has a black or white background
@@ -72,25 +87,57 @@ def letters_extract(gray_img):
 
     # Sort the contours by box location
     bxs = [cv2.boundingRect(c) for c in cnts]
-    _, boxes, hierarchies = zip(*sorted(zip(cnts, bxs, heirs[0]), key=lambda b: b[1], reverse=False))
+    contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs, heirs[0]), key=lambda b: b[1], reverse=False))
 
     # Iterate through the list of sorted contours
     letters = []
+    a_cnts = []
+    a_heirs = []
+    b_cnts = []
+    b_heirs = []
     for idx, box in enumerate(boxes):
+
+        (x, y, w, h) = box
+
+        # Skip aspect ratios that cannot be scaled to 28x28 properly
+        if (w / img_resize) > h or (h / img_resize) > w:
+            continue
 
         # If a contour has a child, assume it's a letter
         if hierarchies[idx][3] != -1:
-            (x, y, w, h) = box
+            # Crop each bounding box
             letter_crop = thresh[y:y + h, x:x + w]
+
+            # Skip blank boxes
+            if np.min(letter_crop) == 255 or np.max(letter_crop) == 0:
+                continue
+
+            # Resize and pad the box
             letter_resize = pad_resize(letter_crop)
+            # Model prefers blurry images
             letter_blur = cv2.bilateralFilter(letter_resize, 2, 0, 0)
+            # Add the box to the list of characters
             letters.append(letter_blur)
 
-    return np.stack(letters)
+            a_cnts.append(contours[idx])
+            a_heirs.append(np.array(hierarchies[idx]))
+        else:
+            b_cnts.append(contours[idx])
+            b_heirs.append(np.array(hierarchies[idx]))
+
+    # TODO: REMOVE
+    # cv.drawContours(image, contours, contourIdx, color[, thickness[, lineType[, hierarchy[, maxLevel[, offset]]]]])
+    rgb_img = cv2.cvtColor(gray_img, cv2.COLOR_GRAY2RGB)
+    cv2.drawContours(rgb_img, a_cnts, DRAW_ALL_CNTS, (255, 0, 0), 2, cv2.LINE_4)     # Blue
+    cv2.drawContours(rgb_img, b_cnts, DRAW_ALL_CNTS, (0, 0, 255), 2, cv2.LINE_4)     # Red
+    cv2.imshow('boxes', rgb_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    return np.expand_dims(np.stack(letters), axis=3)
 
 
 if __name__ == "__main__":
-
     print("Loading image...")
     o = cv2.imread("./test_images/performance.png", cv2.IMREAD_GRAYSCALE)
     print("Imaged loaded!")
