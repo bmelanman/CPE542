@@ -1,9 +1,9 @@
 import os.path
+from pathlib import Path
+
 import keras
 import cv2
 import numpy as np
-
-import matplotlib.pyplot as plt
 
 import segment
 from generate_ocr import generate_ocr_model, result_arr
@@ -18,18 +18,28 @@ def predict(ocr_model, image):
 
     # Display each character and its predicted value
     for idx, letter in enumerate(characters):
-        plt.imshow(letter, cmap=plt.cm.binary)
-        plt.title(f"Prediction: {result_arr[np.argmax(prediction[idx])]}")
-        plt.show()
-        plt.pause(0.25)
-        if idx > 20:
-            break
+
+        x_pos = [20, 320, 620, 920, 1220]
+
+        window_name = f"Image {idx}, Prediction: {result_arr[np.argmax(prediction[idx])]}"
+
+        cv2.namedWindow(window_name)
+        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
+        resize_img = cv2.resize(letter, (280, 280))
+        cv2.imshow(window_name, resize_img)
+        cv2.waitKey(1)
+
+        if idx % 5 == 4:
+            if cv2.waitKey(0) == ord('q'):
+                exit(0)
+            cv2.destroyAllWindows()
+
+    cv2.waitKey(0)
+
+    cv2.destroyAllWindows()
 
 
 def camera_input():
-    # Init user input variable
-    u_input = 0
-
     # Define camera input
     vid = cv2.VideoCapture(0)
 
@@ -53,6 +63,7 @@ def camera_input():
         # Trigger display
         u_input = cv2.waitKey(1000)
 
+        # Check for user input
         if u_input == ord('c') or u_input == ord('q'):
             break
 
@@ -67,7 +78,7 @@ def camera_input():
         return np.zeros((1, 1, 1), dtype="uint8")
 
 
-def main(new_model=False, epochs=12, camera=False):
+def main(camera=False, new_model=False, epochs=12):
     # Directory containing a pre-generated model
     model_dir = "models/ocr"
 
@@ -95,13 +106,20 @@ def main(new_model=False, epochs=12, camera=False):
             return 0
     else:
         # Image to test
+        img_folder = "./test_images/"
+        # img = "card.jpeg"
+        # img = "tesseract_sample.jpg"
         img = "performance.png"
+
+        if not Path(img_folder + img).is_file():
+            print("File not found! Make sure the file name and extension are spelt correctly. ")
+            exit(1)
 
         # Test the network
         print("Testing model using an image file...")
 
         # Load an image in grayscale format
-        test_image = cv2.imread("./test_images/" + img, cv2.IMREAD_GRAYSCALE)
+        test_image = cv2.imread(img_folder + img, cv2.IMREAD_GRAYSCALE)
         print(f"{img} Loaded!")
 
     # Use model to predict the contents of the image
@@ -109,4 +127,4 @@ def main(new_model=False, epochs=12, camera=False):
 
 
 if __name__ == "__main__":
-    main(camera=True)
+    main()

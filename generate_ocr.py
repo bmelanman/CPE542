@@ -26,30 +26,16 @@ def normalize_img(image, label):
 
 
 def random_rotate(image):
-
+    # Should randomly rotate an image 0, 90, 180, or 270 degrees
     return tf.image.rot90(image, random.choice([0, 1, 2, 3]))
 
 
 def generate_ocr_model(filepath, epochs):
     # Creating the CNN model
-
-    # model = Sequential([
-    #     Input(input_shape),
-    #     # Lambda(lambda img: random_rotate(img)),
-    #     Conv2D(32, (3, 3), activation='relu'),
-    #     MaxPool2D((2, 2)),
-    #     Conv2D(64, (3, 3), activation='relu'),
-    #     MaxPool2D((2, 2)),
-    #     Conv2D(128, (3, 3), activation='relu'),
-    #     Flatten(),
-    #     Dense(128, activation='relu'),
-    #     Dropout(0.5),
-    #     Dense(output_shape, activation='sigmoid')
-    # ])
-
-    # ChatGPT Model
-    model = tf.keras.Sequential([
-        Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    model = Sequential([
+        Input(input_shape),
+        # Lambda(lambda img: random_rotate(img)),   # Could improve things? Currently only makes things worse lol
+        Conv2D(32, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
         Conv2D(64, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
@@ -57,7 +43,7 @@ def generate_ocr_model(filepath, epochs):
         Flatten(),
         Dense(128, activation='relu'),
         Dropout(0.5),
-        Dense(62, activation='softmax')
+        Dense(output_shape, activation='softmax')
     ])
 
     # Compile the model
@@ -113,7 +99,7 @@ def generate_ocr_model(filepath, epochs):
 
 
 if __name__ == "__main__":
-    generate_ocr_model(filepath="models/", epochs=2)
+    generate_ocr_model(filepath="models/", epochs=12)
 
     # model_0 = Sequential([
     #     Conv2D(32, (3, 3), input_shape=input_shape, activation='ReLU'),
