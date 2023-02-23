@@ -27,6 +27,9 @@ def predict(ocr_model, image):
 
 
 def camera_input():
+    # Init user input variable
+    u_input = 0
+
     # Define camera input
     vid = cv2.VideoCapture(0)
 
@@ -36,12 +39,13 @@ def camera_input():
         # Capture a video frame
         ret, frame = vid.read()
 
+        # Check to make sure something was captured
+        if frame is None:
+            print("Could not capture from video source!")
+            exit(1)
+
         # Convert to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        if not frame.any():
-            print("Cannot read from video source!")
-            continue
 
         # Display the resulting frame
         cv2.imshow('frame', gray)
