@@ -1,42 +1,23 @@
-import os.path
-from pathlib import Path
-
-import keras
-import cv2
+import tensorflow as tf
 import numpy as np
+import cv2
 
+from pathlib import Path
+import argparse
+
+import generate_ocr
 import segment
-from generate_ocr import generate_ocr_model, result_arr
+from generate_ocr import result_arr, input_size
 
 
-def predict(ocr_model, image):
-    # Convert the image into a list of characters in image format
-    characters = segment.letters_extract(image)
+def tf2tflite(load_filepath="./models/ocr", save_filepath="./models/tf_lite_ocr/"):
+    model = tf.keras.models.load_model(load_filepath)
 
-    # Use the model to predict what each character is
-    prediction = ocr_model.predict(characters)
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    lite_model = converter.convert()
 
-    # Display each character and its predicted value
-    for idx, letter in enumerate(characters):
-
-        x_pos = [20, 320, 620, 920, 1220]
-
-        window_name = f"Image {idx}, Prediction: {result_arr[np.argmax(prediction[idx])]}"
-
-        cv2.namedWindow(window_name)
-        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
-        resize_img = cv2.resize(letter, (280, 280))
-        cv2.imshow(window_name, resize_img)
-        cv2.waitKey(1)
-
-        if idx % 5 == 4:
-            if cv2.waitKey(0) == ord('q'):
-                exit(0)
-            cv2.destroyAllWindows()
-
-    cv2.waitKey(0)
-
-    cv2.destroyAllWindows()
+    with open(save_filepath + "ocr_model.tflite", 'wb') as f:
+        f.write(lite_model)
 
 
 def camera_input():
@@ -78,53 +59,131 @@ def camera_input():
         return np.zeros((1, 1, 1), dtype="uint8")
 
 
-def main(camera=False, new_model=False, epochs=12):
-    # Directory containing a pre-generated model
-    model_dir = "models/ocr"
+def display_results(input_data, input_prediction):
+    # Display each character and its predicted value
+    for idx, letter in enumerate(input_data):
 
-    # Check if the directory exists
-    if not os.path.isdir(model_dir):
-        print(f"Error! Please create the directory '{model_dir}'")
+        x_pos = [20, 320, 620, 920, 1220]
 
-    # Check if a model is in the directory, otherwise generate one
-    if len(os.listdir(path=model_dir)) == 0 or new_model is True:
-        print("Building new model...")
-        generate_ocr_model(filepath=model_dir, epochs=epochs)
-        print("Model Built!\n")
+        window_name = f"Image {idx}, Prediction: {result_arr[np.argmax(input_prediction[idx])]}"
 
-    # Load the CNN model
-    print("Loading model...")
-    ocr_model = keras.models.load_model(filepath=model_dir)
-    print("Model loaded!\n")
+        cv2.namedWindow(window_name)
+        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
+        resize_img = cv2.resize(letter, (280, 280))
+        cv2.imshow(window_name, resize_img)
+        cv2.waitKey(1)
+
+        if idx % 5 == 4:
+            if cv2.waitKey(0) == ord('q'):
+                exit(0)
+            cv2.destroyAllWindows()
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def main(new_model, epochs, camera, img_path, tflite_model_location):
+
+    if new_model:
+        tf_model_path = "./models/ocr"
+        generate_ocr.generate_ocr_model(filepath=tf_model_path, epochs=epochs)
+        tf2tflite(load_filepath=tf_model_path, save_filepath=tflite_model_location)
 
     if camera:
+        # Get image from camera
         test_image = camera_input()
         if test_image.any():
             print("Capture received!")
         else:
             print("Quit input detected, Goodbye!")
-            return 0
+            exit(0)
     else:
-        # Image to test
-        img_folder = "./test_images/"
-        # img = "card.jpeg"
-        # img = "tesseract_sample.jpg"
-        img = "performance.png"
-
-        if not Path(img_folder + img).is_file():
-            print("File not found! Make sure the file name and extension are spelt correctly. ")
+        # Load image from path
+        if not Path(img_path).is_file():
+            print("File not found! Make sure the file name and extension are spelt correctly.")
             exit(1)
 
-        # Test the network
-        print("Testing model using an image file...")
-
         # Load an image in grayscale format
-        test_image = cv2.imread(img_folder + img, cv2.IMREAD_GRAYSCALE)
-        print(f"{img} Loaded!")
+        test_image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-    # Use model to predict the contents of the image
-    predict(ocr_model, test_image)
+    # Convert the image into a list of characters in image format
+    characters = segment.letters_extract(test_image)
+
+    # Load TFLite model and set the input size to the number of characters
+    interpreter = tf.lite.Interpreter(model_path=tflite_model_location)
+    interpreter.resize_tensor_input(0, [len(characters), input_size, input_size, 1])
+    interpreter.allocate_tensors()
+
+    # Get input and output info
+    input_details = interpreter.get_input_details()[0]
+    output_details = interpreter.get_output_details()[0]
+
+    # Load the model with characters for prediction
+    interpreter.set_tensor(input_details['index'], characters)
+
+    # Run the model
+    interpreter.invoke()
+
+    # Get prediction output data
+    prediction = interpreter.get_tensor(output_details['index'])
+
+    # Display the data
+    display_results(characters, prediction)
+
+
+def user_cli():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-i", "--input-image-path", default=None, help="A path to an image to process")
+    parser.add_argument("-m", "--model-path", default=None, help="A path to the model.tflite file")
+    parser.add_argument("-c", "--camera", default=False, help="Enable webcam input (False by default)")
+    parser.add_argument("-n", "--new-model", default=False, help="Generate a new TF model (False by default)")
+    parser.add_argument("-e", "--epochs", default=2,
+                        help="Specified number of epochs to run when generating a new model")
+
+    args = parser.parse_args()
+
+    if args.model_path is None:
+        print("Please provide a model.tflite file!")
+        exit(1)
+
+    if args.input_image_path is None and args.camera is False:
+        print("Please provide an image file or enable the webcam input!")
+        exit(1)
+
+    tflite_model_path = "./models/tf_lite_ocr"
+
+    # TODO: Improve
+    main(
+        camera=args.camera,
+        img_path=args.input_image_path,
+        tflite_model_location=(tflite_model_path + "ocr_model.tflite"),
+        new_model=args.new_model,
+        epochs=args.epochs
+    )
 
 
 if __name__ == "__main__":
-    main()
+    # TODO: Debugging interface
+
+    # Specify test image input
+    img_folder = "./test_images/"
+    # img_name = "card.jpeg"
+    img_name = "performance.png"
+
+    # Camera input flag
+    camera_flag = False
+
+    # TFLite model flags
+    new_model_flag = False
+    num_epochs = None
+    model_path = "./models/tf_lite_ocr/ocr_model.tflite"
+
+    # Run!
+    main(
+        camera=camera_flag,
+        img_path=img_folder + img_name,
+        tflite_model_location=model_path,
+        new_model=new_model_flag,
+        epochs=num_epochs
+    )

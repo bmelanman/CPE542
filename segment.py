@@ -82,7 +82,7 @@ def letters_extract(gray_img):
     adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
-    ret, thresh = cv2.threshold(gray_img, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    ret, thresh = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     # Use findContours to get locations of characters
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
@@ -133,18 +133,3 @@ def letters_extract(gray_img):
         exit(0)
 
     return np.expand_dims(np.stack(letters), axis=3)
-
-
-if __name__ == "__main__":
-    print("Loading image...")
-    o = cv2.imread("./test_images/performance.png", cv2.IMREAD_GRAYSCALE)
-    print("Imaged loaded!")
-
-    print("Extracting letters...")
-    ltrs = letters_extract(o)
-    print("Letters extracted, displaying...")
-
-    for i, ltr in enumerate(ltrs):
-        print(f"Image {i + 1}")
-        cv2.imshow("letter", ltr)
-        cv2.waitKey(200)

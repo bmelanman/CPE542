@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow_datasets as tf_ds
 
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout, Input, Lambda
+from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout, Input
 import random
 
 batch_size = 16
@@ -79,7 +79,14 @@ def generate_ocr_model(filepath, epochs):
 
     model.summary()
 
-    input("Model ready to begin training! Press any key to begin... ")
+    print(
+        "\033[A"
+        "=================================================================\n"
+        f"Epochs: {epochs}\n"
+        "_________________________________________________________________"
+    )
+
+    input("Model ready to begin training! Press any key to begin...\n")
 
     # Train model
     print("Training Model...")
@@ -99,7 +106,7 @@ def generate_ocr_model(filepath, epochs):
 
 
 if __name__ == "__main__":
-    generate_ocr_model(filepath="models/", epochs=12)
+    generate_ocr_model(filepath="./models/ocr", epochs=12)
 
     # model_0 = Sequential([
     #     Conv2D(32, (3, 3), input_shape=input_shape, activation='ReLU'),
