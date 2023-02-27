@@ -59,14 +59,22 @@ def sentence_extract(img):
     mask = cv2.inRange(hsv, lower, upper)
 
     # Create horizontal kernel and dilate to connect text characters
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 3))
-    dilate = cv2.dilate(mask, kernel, iterations=5)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 2)) # 5x2 pixels
+    # dilate = cv2.dilate(mask, kernel, iterations=3) # used to be 5 iterations
+    dilate = cv2.dilate(hsv, kernel, iterations=3)  # used to be 5 iterations
 
     cnts, heirs = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Sort the contours by box location
-    bxs = [cv2.boundingRect(c) for c in cnts]
-    boxes, hierarchies = zip(*sorted(zip(bxs, heirs[0]), key=lambda b: b, reverse=False))
+    # bxs = [cv2.boundingRect(c) for c in cnts]
+    # Alternate box implementation to sort contours
+    bxs = [cv2.minAreaRect(c) for c in cnts]
+    bxs2 = [cv2.boxPoints(b) for b in bxs]
+    bxs3 = [np.int0(b2) for b2 in bxs2]
+
+    # sorts the contours
+    boxes, hierarchies = zip(*sorted(zip(bxs3, heirs[0]), key=lambda b: b, reverse=False))
+    # boxes, hierarchies = zip(*sorted(zip(bxs, heirs[0]), key=lambda b: b, reverse=False))
 
     result = 255 - cv2.bitwise_and(dilate, mask)
 
