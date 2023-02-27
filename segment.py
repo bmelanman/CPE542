@@ -4,25 +4,14 @@ import tensorflow as tf
 
 from generate_ocr import input_size
 
+import matplotlib.pyplot as plt
+
 # Drawing contours
 DRAW_ALL_CNTS = -1
 # Arbitrary border width
 border_width = 2
 # New image size based off border width
 img_resize = input_size - (border_width * 2)
-
-
-def check_dark_background(input_img):
-    # image grayscale and filtering
-    # image = cv2.imread(input_img)
-
-    # another section code to try out
-    # gray = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-    # thresh = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,9,3)
-    # cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-
-    return np.mean(input_img) < 50
 
 
 def pad_resize(orig_image):
@@ -68,11 +57,16 @@ def pad_resize(orig_image):
 
 
 def letters_extract(gray_img):
-    # The input image should already be grayscale!
+    # NOTE: The input image should already be grayscale!
 
     # Check if the image has a black or white background
-    if check_dark_background(gray_img):
+    if np.mean(gray_img) < 50:
         gray_img = cv2.bitwise_not(gray_img)
+
+    vertical_hist = gray_img.shape[0] - np.sum(gray_img, axis=0, keepdims=True) / 255
+    plt.plot(vertical_hist[0])
+    plt.imshow(gray_img)
+    plt.show()
 
     # Reduce image noise
     clean_img = cv2.fastNlMeansDenoising(gray_img, 4, 7, 21)
@@ -90,9 +84,6 @@ def letters_extract(gray_img):
     # Sort the contours by box location (sorted top left to bottom right)
     bxs = [cv2.boundingRect(c) for c in cnts]
     contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs, heirs[0]), key=lambda b: b[1], reverse=False))
-
-    # TODO: REMOVE
-    rgb_img = cv2.cvtColor(gray_img, cv2.COLOR_GRAY2RGB)
 
     # Iterate through the list of sorted contours
     letters = []
@@ -119,16 +110,5 @@ def letters_extract(gray_img):
             letter_blur = cv2.bilateralFilter(letter_resize, 2, 0, 0)
             # Add the box to the list of characters
             letters.append(letter_blur)
-
-            # TODO: REMOVE
-            cv2.rectangle(rgb_img, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue
-
-
-    # TODO: REMOVE
-    cv2.imshow('boxes', rgb_img)
-    u_input = cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    if u_input == ord('q'):
-        exit(0)
 
     return np.expand_dims(np.stack(letters), axis=3)

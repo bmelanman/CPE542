@@ -197,7 +197,8 @@ if __name__ == "__main__":
     # Specify test image input
     img_folder = "./test_images/"
     # img_name = "card.jpeg"
-    img_name = "performance.png"
+    # img_name = "this_is_a_test.png"
+    img_name = "tesseract_sample.jpg"
 
     # Camera input flag
     camera_flag = False
