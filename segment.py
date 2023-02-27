@@ -89,8 +89,12 @@ def letters_extract(gray_img):
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
     # Sort the contours by box location (sorted top left to bottom right)
-    bxs = [cv2.boundingRect(c) for c in cnts]
-    contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs, heirs[0]), key=lambda b: b[1], reverse=False))
+    #bxs = [cv2.boundingRect(c) for c in cnts]
+    bxs = [cv2.minAreaRect(c) for c in cnts]
+    bxs2 = [cv2.boxPoints(b) for b in bxs]
+    bxs3 = [np.int0(b2) for b2 in bxs2]
+
+    contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs3, heirs[0]), key=lambda b: b[1], reverse=False))
 
     # TODO: REMOVE
     rgb_img = cv2.cvtColor(gray_img, cv2.COLOR_GRAY2RGB)
