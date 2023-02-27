@@ -1,9 +1,10 @@
-import tensorflow as tf
-import numpy as np
-import cv2
-
-from pathlib import Path
 import argparse
+import io
+from pathlib import Path
+
+import cv2
+import numpy as np
+import tensorflow as tf
 
 import generate_ocr
 import segment
@@ -18,6 +19,16 @@ def tf2tflite(load_filepath="./models/ocr", save_filepath="./models/tf_lite_ocr/
 
     with open(save_filepath + "ocr_model.tflite", 'wb') as f:
         f.write(lite_model)
+
+
+def is_raspberrypi():  # Random function from stack overflow that checks if the running device is a Raspberry Pi
+    try:
+        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+            if 'raspberry pi' in m.read().lower():
+                return True
+    except (Exception,):
+        pass
+    return False
 
 
 def camera_input():
@@ -59,17 +70,21 @@ def camera_input():
         return np.zeros((1, 1, 1), dtype="uint8")
 
 
-def display_results(input_data, input_prediction):
+def display_results(input_data, prediction_data):
+    # Remove any data with a prediction of less than 50%
+    filtered_list = [x for x in zip(input_data, prediction_data) if np.max(x[1]) > 0.5]
+
     # Display each character and its predicted value
-    for idx, letter in enumerate(input_data):
+    for idx, data_point in enumerate(filtered_list):
 
         x_pos = [20, 320, 620, 920, 1220]
 
-        window_name = f"Image {idx}, Prediction: {result_arr[np.argmax(input_prediction[idx])]}"
+        pred = data_point[1]
+        window_name = f"{result_arr[np.argmax(pred)]} - {np.max(pred) * 100:0.2f}% - {idx}, "
 
         cv2.namedWindow(window_name)
         cv2.moveWindow(window_name, x_pos[idx % 5], 280)
-        resize_img = cv2.resize(letter, (280, 280))
+        resize_img = cv2.resize(data_point[0], (280, 280))
         cv2.imshow(window_name, resize_img)
         cv2.waitKey(1)
 
@@ -83,11 +98,10 @@ def display_results(input_data, input_prediction):
 
 
 def main(new_model, epochs, camera, img_path, tflite_model_location):
-
     if new_model:
-        tf_model_path = "./models/ocr"
-        generate_ocr.generate_ocr_model(filepath=tf_model_path, epochs=epochs)
-        tf2tflite(load_filepath=tf_model_path, save_filepath=tflite_model_location)
+        model_path = "./models/ocr"
+        generate_ocr.generate_ocr_model(filepath=model_path, epochs=epochs)
+        tf2tflite(load_filepath=model_path, save_filepath=tflite_model_location)
 
     if camera:
         # Get image from camera
@@ -109,8 +123,22 @@ def main(new_model, epochs, camera, img_path, tflite_model_location):
     # Convert the image into a list of characters in image format
     characters = segment.letters_extract(test_image)
 
+    # Optional use of ArmNN Library
+    arm_nn_delegate = None
+    if is_raspberrypi():
+        arm_nn_delegate = tf.lite.experimental.load_delegate(
+            library="",                                                         # TODO: Install library on raspberry pi
+            options={
+                "backends": "CpuAcc,GpuAcc,CpuRef",
+                "logging-severity": "info"
+            }
+        )
+
     # Load TFLite model and set the input size to the number of characters
-    interpreter = tf.lite.Interpreter(model_path=tflite_model_location)
+    interpreter = tf.lite.Interpreter(
+        model_path=tflite_model_location,
+        experimental_delegates=arm_nn_delegate
+    )
     interpreter.resize_tensor_input(0, [len(characters), input_size, input_size, 1])
     interpreter.allocate_tensors()
 
@@ -151,13 +179,13 @@ def user_cli():
         print("Please provide an image file or enable the webcam input!")
         exit(1)
 
-    tflite_model_path = "./models/tf_lite_ocr"
+    lite_model_path = "./models/tf_lite_ocr"
 
     # TODO: Improve
     main(
         camera=args.camera,
         img_path=args.input_image_path,
-        tflite_model_location=(tflite_model_path + "ocr_model.tflite"),
+        tflite_model_location=(lite_model_path + "ocr_model.tflite"),
         new_model=args.new_model,
         epochs=args.epochs
     )
@@ -177,13 +205,20 @@ if __name__ == "__main__":
     # TFLite model flags
     new_model_flag = False
     num_epochs = None
-    model_path = "./models/tf_lite_ocr/ocr_model.tflite"
+    tf_model_path = "./models/ocr"
+    tflite_model_path = "./models/tf_lite_ocr/ocr_model.tflite"
+
+    ####################################################################
+    # Check for new model flag
+    if new_model_flag:
+        generate_ocr.generate_ocr_model(tf_model_path, num_epochs)
+        tf2tflite(tf_model_path, tflite_model_path)
 
     # Run!
     main(
         camera=camera_flag,
         img_path=img_folder + img_name,
-        tflite_model_location=model_path,
+        tflite_model_location=tflite_model_path,
         new_model=new_model_flag,
         epochs=num_epochs
     )

@@ -1,9 +1,9 @@
 import tensorflow as tf
 import tensorflow_datasets as tf_ds
+from numpy import random
 
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout, Input
-import random
 
 batch_size = 16
 input_size = 28

@@ -122,8 +122,7 @@ def letters_extract(gray_img):
 
             # TODO: REMOVE
             cv2.rectangle(rgb_img, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue
-        else:
-            cv2.rectangle(rgb_img, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Red
+
 
     # TODO: REMOVE
     cv2.imshow('boxes', rgb_img)
