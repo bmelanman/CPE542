@@ -17,16 +17,15 @@ def test_letters_extract(gray_img):
     plt.imshow(gray_img)
     plt.show()
 
-    # Reduce image noise (w/o None, dst is 4 and the last two become 21, added None->)
-    # https://stackoverflow.com/questions/59424253/weird-behavior-of-cv2-fastnlmeansdenoising
-    clean_img = cv2.fastNlMeansDenoising(gray_img, None, 4, 7, 21)
+    # Reduce image noise
+    clean_img = cv2.fastNlMeansDenoising(gray_img, 4, 7, 21)
 
     # Apply blur and adaptive threshold filter to help finding characters
-    blured = cv2.blur(clean_img, None, (5, 5), 0)
-    adapt_thresh = cv2.adaptiveThreshold(blured, None, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
+    blured = cv2.blur(clean_img, (5, 5), 0)
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
-    ret, thresh = cv2.threshold(gray_img, None, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    ret, thresh = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     # Use findContours to get locations of characters
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
