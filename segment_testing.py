@@ -117,8 +117,9 @@ def segmentation_test(gray_img):
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
     for c in cnts:
-        x, y, w, h = cv2.boundingRect(c)
-        cv2.rectangle(cropped_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        rect = cv2.minAreaRect(c)
+        box = np.int0(cv2.BoxPoints(rect))
+        cv2.drawContours(cropped_img, [box], 0, (0, 0, 255), 2)
 
     plt.imshow(cropped_img, cmap='gray')
     plt.title("cnts")
