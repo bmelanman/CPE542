@@ -66,3 +66,44 @@ def test_letters_extract(gray_img):
             letters.append(letter_blur)
 
     return np.expand_dims(np.stack(letters), axis=3)
+
+
+def segmentation_test(gray_img):
+
+    plt.imshow(gray_img, cmap='gray')
+    plt.title("Original Grayscale Image")
+    plt.show()
+
+    # clean_img = cv2.fastNlMeansDenoising(gray_img, 4, 7, 21)
+    # plt.imshow(clean_img, cmap='gray')
+    # plt.title("clean img")
+    # plt.show()
+
+    blured = cv2.medianBlur(gray_img, 21)
+    plt.imshow(blured, cmap='gray')
+    plt.title("blured")
+    plt.show()
+
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
+    plt.imshow(adapt_thresh, cmap='gray')
+    plt.title("adapt_thresh")
+    plt.show()
+
+    cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+    # cv2.drawContours(image, contours, contourIdx, color, thickness, lineType, hierarchy, maxLevel, offset)
+    cnt_img = cv2.drawContours(gray_img.copy(), cnts, -1, (0, 0, 0), 10, cv2.LINE_4)
+    plt.imshow(cnt_img, cmap='gray')
+    plt.title("cnts")
+    plt.show()
+
+    print('')
+
+
+if __name__ == "__main__":
+
+    image_name = "card.jpeg"
+
+    test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
+
+    segmentation_test(test_image)
