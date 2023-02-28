@@ -71,18 +71,44 @@ def test_letters_extract(gray_img):
     return np.expand_dims(np.stack(letters), axis=3)
 
 
-def segmentation_test(gray_img):
+def fit(gray_img):
+    # threshold
+    thresh = cv2.threshold(gray_img, 190, 255, cv2.THRESH_BINARY)[1]
 
+    # apply morphology
+    kernel = np.ones((7, 7), np.uint8)
+    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    kernel = np.ones((9, 9), np.uint8)
+    morph = cv2.morphologyEx(morph, cv2.MORPH_ERODE, kernel)
+
+    # get largest contour
+    contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours = contours[0] if len(contours) == 2 else contours[1]
+
+    largest_cnt = sorted(contours, key=cv2.contourArea, reverse=True)[0]
+
+    # get bounding box
+    x, y, w, h = cv2.boundingRect(largest_cnt)
+
+    # draw filled contour on black background
+    mask = np.zeros_like(gray_img)
+    cv2.drawContours(mask, [largest_cnt], -1, (255, 255, 255), cv2.FILLED)
+
+    # crop result
+    return gray_img[y:y + h, x:x + w]
+
+
+def segmentation_test(gray_img):
     plt.imshow(gray_img, cmap='gray')
     plt.title("Original Grayscale Image")
     plt.show()
 
-    # clean_img = cv2.fastNlMeansDenoising(gray_img, 4, 7, 21)
-    # plt.imshow(clean_img, cmap='gray')
-    # plt.title("clean img")
-    # plt.show()
+    cropped_img = fit(gray_img)
+    plt.imshow(cropped_img, cmap='gray')
+    plt.title("fit")
+    plt.show()
 
-    blured = cv2.medianBlur(gray_img, 21)
+    blured = cv2.medianBlur(cropped_img, 13)
     plt.imshow(blured, cmap='gray')
     plt.title("blured")
     plt.show()
@@ -94,9 +120,11 @@ def segmentation_test(gray_img):
 
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
-    # cv2.drawContours(image, contours, contourIdx, color, thickness, lineType, hierarchy, maxLevel, offset)
-    cnt_img = cv2.drawContours(gray_img.copy(), cnts, -1, (0, 0, 0), 10, cv2.LINE_4)
-    plt.imshow(cnt_img, cmap='gray')
+    for c in cnts:
+        x, y, w, h = cv2.boundingRect(c)
+        cv2.rectangle(cropped_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    plt.imshow(cropped_img, cmap='gray')
     plt.title("cnts")
     plt.show()
 
@@ -104,8 +132,8 @@ def segmentation_test(gray_img):
 
 
 if __name__ == "__main__":
-
     image_name = "card.jpeg"
+    # image_name = "performance.png"
 
     test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
 
