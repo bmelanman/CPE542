@@ -15,7 +15,6 @@ img_resize = input_size - (border_width * 2)
 
 
 def pad_resize(orig_image):
-
     # Add 3rd dimension for resize and model input
     expand = np.expand_dims(orig_image, axis=2)
     # Invert because resize pads with 0's
@@ -68,27 +67,22 @@ def letters_extract(gray_img):
     plt.imshow(gray_img)
     plt.show()
 
-    # Reduce image noise (w/o None, dst is 4 and the last two become 21, added None->)
-    # https://stackoverflow.com/questions/59424253/weird-behavior-of-cv2-fastnlmeansdenoising
-    clean_img = cv2.fastNlMeansDenoising(gray_img, None, 4, 7, 21)
+    # Reduce image noise
+    clean_img = cv2.fastNlMeansDenoising(gray_img, 4, 7, 21)
 
     # Apply blur and adaptive threshold filter to help finding characters
-    blured = cv2.blur(clean_img, None, (5, 5), 0)
-    adapt_thresh = cv2.adaptiveThreshold(blured, None, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
+    blured = cv2.blur(clean_img, (5, 5), 0)
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
-    ret, thresh = cv2.threshold(gray_img, None, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    ret, thresh = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     # Use findContours to get locations of characters
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
     # Sort the contours by box location (sorted top left to bottom right)
-    #bxs = [cv2.boundingRect(c) for c in cnts]
-    bxs = [cv2.minAreaRect(c) for c in cnts]
-    bxs2 = [cv2.boxPoints(b) for b in bxs]
-    bxs3 = [np.int0(b2) for b2 in bxs2]
-
-    contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs3, heirs[0]), key=lambda b: b[1], reverse=False))
+    bxs = [cv2.boundingRect(c) for c in cnts]
+    contours, boxes, hierarchies = zip(*sorted(zip(cnts, bxs, heirs[0]), key=lambda b: b[1], reverse=False))
 
     # Iterate through the list of sorted contours
     letters = []
