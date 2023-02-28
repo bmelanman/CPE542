@@ -22,10 +22,10 @@ def test_letters_extract(gray_img):
 
     # Apply blur and adaptive threshold filter to help finding characters
     blured = cv2.blur(clean_img, (5, 5), 0)
-    #blured = cv2.boxFilter(clean_img, -1, (5, 5))
-    #blured = cv2.bilateralFilter(clean_img, 15, 75, 75)
-    #blured = cv2.GaussianBlur(clean_img, (5, 5), 0))
-    #blured = cv2.medianBlur(clean_img, 5)
+    # blured = cv2.boxFilter(clean_img, -1, (5, 5))
+    # blured = cv2.bilateralFilter(clean_img, 15, 75, 75)
+    # blured = cv2.GaussianBlur(clean_img, (5, 5), 0))
+    # blured = cv2.medianBlur(clean_img, 5)
     adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
@@ -90,45 +90,49 @@ def fit(gray_img):
     # get bounding box
     x, y, w, h = cv2.boundingRect(largest_cnt)
 
-    # draw filled contour on black background
-    mask = np.zeros_like(gray_img)
-    cv2.drawContours(mask, [largest_cnt], -1, (255, 255, 255), cv2.FILLED)
-
     # crop result
     return gray_img[y:y + h, x:x + w]
 
 
 def segmentation_test(gray_img):
     plt.imshow(gray_img, cmap='gray')
-    plt.title("Original Grayscale Image")
+    plt.title("Original Image")
     plt.show()
 
     cropped_img = fit(gray_img)
-    plt.imshow(cropped_img, cmap='gray')
-    plt.title("fit")
-    plt.show()
 
-    blured = cv2.medianBlur(cropped_img, 13)
+    blured = cv2.medianBlur(cropped_img, 11)
+
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 7)
+
     plt.imshow(blured, cmap='gray')
     plt.title("blured")
     plt.show()
-
-    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
     plt.imshow(adapt_thresh, cmap='gray')
     plt.title("adapt_thresh")
     plt.show()
 
-    cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0]
 
+    boxes = []
+    rot_boxes = []
     for i, c in enumerate(cnts):
         if heirs[i][3] != -1:
             rect = cv2.minAreaRect(c)
-            box = np.intp(cv2.boxPoints(rect))
-            cv2.drawContours(cropped_img, [box], 0, (0, 0, 0), 5)
+            rot_boxes.append(np.intp(cv2.boxPoints(rect)))
 
-    plt.imshow(cropped_img, cmap='brg')
-    plt.title("cnts")
+            x, y, w, h = cv2.boundingRect(c)
+            boxes.append(np.array([(x, y + h), (x, y), (x + w, y), (x + w, y + h)]))
+
+    boxes_img = cv2.drawContours(adapt_thresh.copy(), boxes, -1, (127, 127, 127), 10)
+    plt.imshow(boxes_img, cmap='brg')
+    plt.title("Final Image")
+    plt.show()
+
+    rot_img = cv2.drawContours(adapt_thresh.copy(), rot_boxes, -1, (127, 127, 127), 10)
+    plt.imshow(rot_img, cmap='brg')
+    plt.title("Final Image with Rotated Boxes")
     plt.show()
 
     print('')

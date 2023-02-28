@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-from main import predict
-
 
 def gaussian_diff_filter(gray_img, kernel1, kernel2):
 
