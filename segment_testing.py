@@ -119,13 +119,15 @@ def segmentation_test(gray_img):
     plt.show()
 
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    heirs = heirs[0]
 
-    for c in cnts:
-        rect = cv2.minAreaRect(c)
-        box = np.int0(cv2.BoxPoints(rect))
-        cv2.drawContours(cropped_img, [box], 0, (0, 0, 255), 2)
+    for i, c in enumerate(cnts):
+        if heirs[i][3] != -1:
+            rect = cv2.minAreaRect(c)
+            box = np.intp(cv2.boxPoints(rect))
+            cv2.drawContours(cropped_img, [box], 0, (0, 0, 0), 5)
 
-    plt.imshow(cropped_img, cmap='gray')
+    plt.imshow(cropped_img, cmap='brg')
     plt.title("cnts")
     plt.show()
 
