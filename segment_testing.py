@@ -22,6 +22,10 @@ def test_letters_extract(gray_img):
 
     # Apply blur and adaptive threshold filter to help finding characters
     blured = cv2.blur(clean_img, (5, 5), 0)
+    #blured = cv2.boxFilter(clean_img, -1, (5, 5))
+    #blured = cv2.bilateralFilter(clean_img, 15, 75, 75)
+    #blured = cv2.GaussianBlur(clean_img, (5, 5), 0))
+    #blured = cv2.medianBlur(clean_img, 5)
     adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 2)
 
     # Sharpen image for later segmentation
