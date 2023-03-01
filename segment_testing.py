@@ -1,8 +1,7 @@
-import time
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import bisect
 
 import segment
 
@@ -89,10 +88,9 @@ def fit(gray_img):
     kernel = np.ones((9, 9), np.uint8)
     morph = cv2.morphologyEx(morph, cv2.MORPH_ERODE, kernel)
 
-    # get largest contour
+    # get the largest contour by area
     contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contours = contours[0] if len(contours) == 2 else contours[1]
-
     largest_cnt = sorted(contours, key=cv2.contourArea, reverse=True)[0]
 
     # get bounding box
@@ -103,28 +101,16 @@ def fit(gray_img):
 
 
 def is_intersecting(box0, box_list):
-
     for idx, box1 in enumerate(box_list):
-
-        # Check if box1 is within box0
-        if (box0[t][x] <= box1[t][x] <= box0[b][x] and box0[t][y] <= box1[t][y] <= box0[b][y]) \
-                or (box0[t][x] <= box1[b][x] <= box0[b][x] and box0[t][y] <= box1[b][y] <= box0[b][y]) \
-                or (box0[t][x] <= box1[b][x] <= box0[b][x] and box0[t][y] <= box1[t][y] <= box0[b][y]) \
-                or (box0[t][x] <= box1[t][x] <= box0[b][x] and box0[t][y] <= box1[b][y] <= box0[b][y]):
+        if not (box1[t][x] > box0[b][x]) \
+                and not (box0[t][x] > box1[b][x]) \
+                and not (box1[t][y] > box0[b][y]) \
+                and not (box0[t][y] > box1[b][y]):
             return idx
-
-        # Check if box0 is within box1
-        if (box1[t][x] <= box0[t][x] <= box1[b][x] and box1[t][y] <= box0[t][y] <= box1[b][y]) \
-                or (box1[t][x] <= box0[b][x] <= box1[b][x] and box1[t][y] <= box0[b][y] <= box1[b][y]) \
-                or (box1[t][x] <= box0[b][x] <= box1[b][x] and box1[t][y] <= box0[t][y] <= box1[b][y]) \
-                or (box1[t][x] <= box0[t][x] <= box1[b][x] and box1[t][y] <= box0[b][y] <= box1[b][y]):
-            return idx
-
-    return False
+    return None
 
 
 def combine(box0, box1):
-
     x_vals = box0[t][x], box0[b][x], box1[t][x], box1[b][x]
     y_vals = box0[t][y], box0[b][y], box1[t][y], box1[b][y]
 
@@ -132,10 +118,6 @@ def combine(box0, box1):
 
 
 def segmentation_test(gray_img):
-    t0 = time.time()
-    plt.imshow(gray_img, cmap='gray')
-    plt.title("Original Image")
-    plt.show()
 
     cropped_img = fit(gray_img)
 
@@ -143,54 +125,57 @@ def segmentation_test(gray_img):
 
     adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
 
-    plt.imshow(blured, cmap='gray')
-    plt.title("blured")
-    plt.show()
-    plt.imshow(adapt_thresh, cmap='gray')
-    plt.title("adapt_thresh")
-    plt.show()
-
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    heirs = heirs[0]
+    heirs = heirs[0, :, 3]
 
     box_list = []
-    cpy_img = adapt_thresh.copy()
     for i, c in enumerate(cnts):
-        if heirs[i][3] != -1:
+        if heirs[i] != -1:
 
+            # Skip areas that cannot be resized properly
             x_val, y_val, w, h = cv2.boundingRect(c)
-
             if (w / segment.img_resize) > h or (h / segment.img_resize) > w:
                 continue
 
-            crop = adapt_thresh[y_val:y_val + h, x_val:x_val + w]
-
             # Skip blank boxes
+            crop = adapt_thresh[y_val:y_val + h, x_val:x_val + w]
             if np.min(crop) == 255 or np.max(crop) == 0:
                 continue
 
             # Check for overlapping boxes and combine them
             box = (x_val, y_val), (x_val + w, y_val + h)
             inter = is_intersecting(box, box_list)
-            if inter is False:
-                box_list.append(box)
-            else:
-                box = combine(box_list[inter], box)
-                box_list[inter] = box
+            if inter is not None:
+                box = combine(box, box_list.pop(inter))
+
+            # Insert the box into a sorted list
+            bisect.insort(box_list, box)
+
+    letters = []
+    for bx in box_list:
+        box_image = cropped_img[bx[t][y]:bx[b][y], bx[t][x]:bx[b][x]]
+        # Resize and pad the box
+        letter_resize = segment.pad_resize(box_image)
+        # Model prefers blurry images
+        letter_blur = cv2.bilateralFilter(letter_resize, 2, 0, 0)
+        # Add the box to the list of characters
+        letters.append(letter_blur)
+
+    return np.expand_dims(np.stack(letters), axis=3)
+
+
+def disp_testing(box_list):
 
     for bx in box_list:
-        cv2.rectangle(cpy_img, bx[0], bx[1], (127, 127, 127), thickness=4)
-    plt.imshow(cpy_img, cmap='brg')
-    plt.title("Final Image")
-    plt.show()
-
-    print(f"Total time: {time.time() - t0:.2f} seconds")
+        plt.imshow(bx)
+        plt.show()
 
 
 if __name__ == "__main__":
-    image_name = "card.jpeg"
-    # image_name = "performance.png"
+    # image_name = "card.jpeg"
+    image_name = "performance.png"
 
     test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
 
-    segmentation_test(test_image)
+    chars = segmentation_test(test_image)
+    disp_testing(chars)

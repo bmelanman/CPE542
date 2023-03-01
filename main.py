@@ -1,5 +1,6 @@
 import argparse
 import io
+import time
 from pathlib import Path
 
 import cv2
@@ -7,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 
 import generate_ocr
-import segment
+import segment_testing
 from generate_ocr import result_arr, input_size
 
 
@@ -70,9 +71,9 @@ def camera_input():
         return np.zeros((1, 1, 1), dtype="uint8")
 
 
-def display_results(input_data, prediction_data):
+def display_results(input_data, prediction_data, pred_min: float):
     # Remove any data with a prediction of less than 50%
-    filtered_list = [x for x in zip(input_data, prediction_data) if np.max(x[1]) > 0.5]
+    filtered_list = [x for x in zip(input_data, prediction_data) if np.max(x[1]) > pred_min]
 
     # Display each character and its predicted value
     for idx, data_point in enumerate(filtered_list):
@@ -93,11 +94,12 @@ def display_results(input_data, prediction_data):
                 exit(0)
             cv2.destroyAllWindows()
 
-    cv2.waitKey(0)
+    if len(filtered_list) % 5 != 0:
+        cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
-def main(new_model, epochs, camera, img_path, tflite_model_location):
+def main(new_model, epochs, camera, img_path, tflite_model_location, pred_min: float):
     if new_model:
         model_path = "./models/ocr"
         generate_ocr.generate_ocr_model(filepath=model_path, epochs=epochs)
@@ -121,7 +123,8 @@ def main(new_model, epochs, camera, img_path, tflite_model_location):
         test_image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
     # Convert the image into a list of characters in image format
-    characters = segment.letters_extract(test_image)
+    # characters = segment.letters_extract(test_image)
+    characters = segment_testing.segmentation_test(test_image)
 
     # Optional use of ArmNN Library
     arm_nn_delegate = None
@@ -155,8 +158,11 @@ def main(new_model, epochs, camera, img_path, tflite_model_location):
     # Get prediction output data
     prediction = interpreter.get_tensor(output_details['index'])
 
+    # Timer
+    print(f"Processing time: {time.time() - t0:.2f}")
+
     # Display the data
-    display_results(characters, prediction)
+    display_results(characters, prediction, pred_min)
 
 
 def user_cli():
@@ -187,18 +193,25 @@ def user_cli():
         img_path=args.input_image_path,
         tflite_model_location=(lite_model_path + "ocr_model.tflite"),
         new_model=args.new_model,
-        epochs=args.epochs
+        epochs=args.epochs,
+        pred_min=0.5
     )
 
 
 if __name__ == "__main__":
     # TODO: Debugging interface
 
+    # Calculate apx. execution time
+    t0 = time.time()
+
     # Specify test image input
     img_folder = "./test_images/"
     # img_name = "card.jpeg"
     img_name = "performance.png"
-    # img_name = "tesseract_sample.jpg"
+    # img_name = "hsf.png"
+
+    # Minimum prediction confidence
+    min_conf = 0.3
 
     # Camera input flag
     camera_flag = False
@@ -221,5 +234,6 @@ if __name__ == "__main__":
         img_path=img_folder + img_name,
         tflite_model_location=tflite_model_path,
         new_model=new_model_flag,
-        epochs=num_epochs
+        epochs=num_epochs,
+        pred_min=min_conf
     )
