@@ -207,8 +207,8 @@ if __name__ == "__main__":
     # Specify test image input
     img_folder = "./test_images/"
     # img_name = "card.jpeg"
-    img_name = "performance.png"
-    # img_name = "hsf.png"
+    # img_name = "performance.png"
+    img_name = "this_is_a_test.png"
 
     # Minimum prediction confidence
     min_conf = 0.3

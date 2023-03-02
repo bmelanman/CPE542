@@ -173,7 +173,8 @@ def disp_testing(box_list):
 
 if __name__ == "__main__":
     # image_name = "card.jpeg"
-    image_name = "performance.png"
+    # image_name = "performance.png"
+    image_name = "this_is_a_test.png"
 
     test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
 
