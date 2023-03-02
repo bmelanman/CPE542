@@ -3,7 +3,7 @@ from keras.callbacks import ReduceLROnPlateau
 from tensorflow_datasets import load
 
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout, Input
+from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input
 from keras.optimizers import Adam
 
 
@@ -14,19 +14,6 @@ def normalize_img(image, label):
 
 def generate_ocr_model(filepath, epochs):
     # Creating the CNN model
-    # model = Sequential([
-    #     Input(shape=(28, 28, 1)),
-    #     Conv2D(32, (3, 3), activation='relu'),
-    #     MaxPool2D((2, 2)),
-    #     Conv2D(64, (3, 3), activation='relu'),
-    #     MaxPool2D((2, 2)),
-    #     Conv2D(128, (3, 3), activation='relu'),
-    #     Flatten(),
-    #     Dense(128, activation='relu'),
-    #     Dropout(0.5),
-    #     Dense(62, activation='softmax')
-    # ])
-
     model = Sequential([
         Input(shape=(28, 28, 1)),
         Conv2D(32, (3, 3), activation='relu'),
@@ -80,9 +67,9 @@ def generate_ocr_model(filepath, epochs):
     input("Model ready to begin training! Press any key to begin...\n")
 
     reduce_lr = ReduceLROnPlateau(
-        monitor='val_loss',
-        factor=0.8,
-        patience=2,
+        monitor='val_acc',
+        factor=0.5,
+        patience=3,
         min_lr=0.0001
     )
 
@@ -99,7 +86,7 @@ def generate_ocr_model(filepath, epochs):
 
 
 if __name__ == "__main__":
-    generate_ocr_model(filepath="./models/ocr", epochs=12)
+    generate_ocr_model(filepath="./models/ocr", epochs=30)
 
 # model = Sequential([
 #     Input(shape=(28, 28, 1)),
@@ -134,4 +121,15 @@ if __name__ == "__main__":
 # - optimizer = Adam(epsilon=0.1)
 # - loss = 'categorical_crossentropy'
 # - callbacks = ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=2, min_lr=0.0001)
-#
+# Epoch  1/12 - 419s 10ms/step - loss: 0.8454 - accuracy: 0.7403 - val_loss: 0.5575 - val_accuracy: 0.8079 - lr: 0.0010
+# Epoch  2/12 - 380s  9ms/step - loss: 0.5155 - accuracy: 0.8210 - val_loss: 0.4906 - val_accuracy: 0.8287 - lr: 0.0010
+# Epoch  3/12 - 380s  9ms/step - loss: 0.4686 - accuracy: 0.8343 - val_loss: 0.4655 - val_accuracy: 0.8356 - lr: 0.0010
+# Epoch  4/12 - 376s  9ms/step - loss: 0.4440 - accuracy: 0.8414 - val_loss: 0.4519 - val_accuracy: 0.8391 - lr: 0.0010
+# Epoch  5/12 - 363s  8ms/step - loss: 0.4280 - accuracy: 0.8458 - val_loss: 0.4415 - val_accuracy: 0.8419 - lr: 0.0010
+# Epoch  6/12 - 365s  8ms/step - loss: 0.4163 - accuracy: 0.8493 - val_loss: 0.4337 - val_accuracy: 0.8443 - lr: 0.0010
+# Epoch  7/12 - 380s  9ms/step - loss: 0.4073 - accuracy: 0.8519 - val_loss: 0.4289 - val_accuracy: 0.8457 - lr: 0.0010
+# Epoch  8/12 - 373s  9ms/step - loss: 0.3998 - accuracy: 0.8542 - val_loss: 0.4245 - val_accuracy: 0.8473 - lr: 0.0010
+# Epoch  9/12 - 380s  9ms/step - loss: 0.3934 - accuracy: 0.8558 - val_loss: 0.4208 - val_accuracy: 0.8478 - lr: 0.0010
+# Epoch 10/12 - 379s  9ms/step - loss: 0.3880 - accuracy: 0.8572 - val_loss: 0.4188 - val_accuracy: 0.8482 - lr: 0.0010
+# Epoch 11/12 - 375s  9ms/step - loss: 0.3831 - accuracy: 0.8587 - val_loss: 0.4165 - val_accuracy: 0.8492 - lr: 0.0010
+# Epoch 12/12 - 369s  8ms/step - loss: 0.3787 - accuracy: 0.8600 - val_loss: 0.4162 - val_accuracy: 0.8494 - lr: 0.0010

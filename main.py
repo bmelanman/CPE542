@@ -99,11 +99,7 @@ def display_results(input_data, prediction_data, pred_min: float):
     cv2.destroyAllWindows()
 
 
-def main(new_model, epochs, camera, img_path, tflite_model_location, pred_min: float):
-    if new_model:
-        model_path = "./models/ocr"
-        generate_ocr.generate_ocr_model(filepath=model_path, epochs=epochs)
-        tf2tflite(load_filepath=model_path, save_filepath=tflite_model_location)
+def main(camera, img_path, tflite_model_location, pred_min: float):
 
     if camera:
         # Get image from camera
@@ -171,9 +167,6 @@ def user_cli():
     parser.add_argument("-i", "--input-image-path", default=None, help="A path to an image to process")
     parser.add_argument("-m", "--model-path", default=None, help="A path to the model.tflite file")
     parser.add_argument("-c", "--camera", default=False, help="Enable webcam input (False by default)")
-    parser.add_argument("-n", "--new-model", default=False, help="Generate a new TF model (False by default)")
-    parser.add_argument("-e", "--epochs", default=2,
-                        help="Specified number of epochs to run when generating a new model")
 
     args = parser.parse_args()
 
@@ -192,8 +185,6 @@ def user_cli():
         camera=args.camera,
         img_path=args.input_image_path,
         tflite_model_location=(lite_model_path + "ocr_model.tflite"),
-        new_model=args.new_model,
-        epochs=args.epochs,
         pred_min=0.5
     )
 
@@ -207,8 +198,8 @@ if __name__ == "__main__":
     # Specify test image input
     img_folder = "./test_images/"
     # img_name = "card.jpeg"
-    # img_name = "performance.png"
-    img_name = "this_is_a_test.png"
+    img_name = "performance.png"
+    # img_name = "this_is_a_test.png"
 
     # Minimum prediction confidence
     min_conf = 0.3
@@ -217,15 +208,17 @@ if __name__ == "__main__":
     camera_flag = False
 
     # TFLite model flags
-    new_model_flag = False
+    create_new_model_flag = False
+    load_new_model_flag = True
     num_epochs = None
     tf_model_path = "./models/ocr"
     tflite_model_path = "./models/tf_lite_ocr/ocr_model.tflite"
 
     ####################################################################
     # Check for new model flag
-    if new_model_flag:
+    if create_new_model_flag:
         generate_ocr.generate_ocr_model(tf_model_path, num_epochs)
+    if create_new_model_flag or load_new_model_flag:
         tf2tflite(tf_model_path, tflite_model_path)
 
     # Run!
@@ -233,7 +226,5 @@ if __name__ == "__main__":
         camera=camera_flag,
         img_path=img_folder + img_name,
         tflite_model_location=tflite_model_path,
-        new_model=new_model_flag,
-        epochs=num_epochs,
         pred_min=min_conf
     )

@@ -13,6 +13,7 @@ y = 1
 
 
 def test_letters_extract(gray_img):
+    # TODO: Parse the 'i' and related correctly!
     # NOTE: The input image should already be grayscale!
 
     # Check if the image has a black or white background
@@ -78,26 +79,40 @@ def test_letters_extract(gray_img):
     return np.expand_dims(np.stack(letters), axis=3)
 
 
+def disp_img(image, name, color_map='gray'):
+    plt.imshow(image, cmap=color_map)
+    plt.title(name)
+    plt.show()
+
+
 def fit(gray_img):
     # threshold
     thresh = cv2.threshold(gray_img, 190, 255, cv2.THRESH_BINARY)[1]
 
     # apply morphology
     kernel = np.ones((7, 7), np.uint8)
-    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    morph1 = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
     kernel = np.ones((9, 9), np.uint8)
-    morph = cv2.morphologyEx(morph, cv2.MORPH_ERODE, kernel)
+    morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
 
     # get the largest contour by area
-    contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours = cv2.findContours(morph2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contours = contours[0] if len(contours) == 2 else contours[1]
-    largest_cnt = sorted(contours, key=cv2.contourArea, reverse=True)[0]
+    sorted_cnts = sorted(contours, key=cv2.contourArea, reverse=True)
+
+    # bxs = [cv2.minAreaRect(c) for c in sorted_cnts]
+    # bxs2 = [cv2.boxPoints(b1) for b1 in bxs]
+    # bxs3 = [np.int0(b2) for b2 in bxs2]
+
+    # pt0, pt1, pt2, pt3 = bxs3[0]
+    # cropped_img = gray_img[]
 
     # get bounding box
-    x_val, y_val, w, h = cv2.boundingRect(largest_cnt)
+    x_val, y_val, w, h = cv2.boundingRect(sorted_cnts[0])
+    cropped_img = gray_img[y_val:y_val + h, x_val:x_val + w]
 
     # crop result
-    return gray_img[y_val:y_val + h, x_val:x_val + w]
+    return cropped_img
 
 
 def is_intersecting(box0, box_list):
@@ -118,12 +133,30 @@ def combine(box0, box1):
 
 
 def segmentation_test(gray_img):
+    # Check if the image has a black or white background
+    if np.mean(gray_img) < 50:
+        gray_img = cv2.bitwise_not(gray_img)
 
     cropped_img = fit(gray_img)
 
-    blured = cv2.medianBlur(cropped_img, 11)
+    blured = cv2.medianBlur(cropped_img, 7)
 
-    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+    thresh = cv2.threshold(blured, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+    kernel = np.ones((3, 3), np.uint8)
+    morph1 = cv2.morphologyEx(thresh, cv2.MORPH_DILATE, kernel, iterations=2)
+    #
+    kernel = np.ones((5, 5), np.uint8)
+    morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
+
+    adapt_thresh = cv2.adaptiveThreshold(morph2, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+
+    disp_img(cropped_img, "cropped_img")
+    disp_img(blured, "blured")
+    disp_img(thresh, "thresh")
+    disp_img(morph1, "morph1")
+    disp_img(morph2, "morph2")
+    disp_img(adapt_thresh, "adapt_thresh")
 
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
@@ -138,7 +171,7 @@ def segmentation_test(gray_img):
                 continue
 
             # Skip blank boxes
-            crop = adapt_thresh[y_val:y_val + h, x_val:x_val + w]
+            crop = morph2[y_val:y_val + h, x_val:x_val + w]
             if np.min(crop) == 255 or np.max(crop) == 0:
                 continue
 
@@ -152,7 +185,11 @@ def segmentation_test(gray_img):
             bisect.insort(box_list, box)
 
     letters = []
+    cpy_img = cropped_img.copy()
     for bx in box_list:
+
+        cv2.rectangle(cpy_img, bx[t], bx[b], (0, 0, 0), thickness=4)
+
         box_image = cropped_img[bx[t][y]:bx[b][y], bx[t][x]:bx[b][x]]
         # Resize and pad the box
         letter_resize = segment.pad_resize(box_image)
@@ -161,22 +198,30 @@ def segmentation_test(gray_img):
         # Add the box to the list of characters
         letters.append(letter_blur)
 
+    disp_img(cpy_img, "boxes", color_map='brg')
+
     return np.expand_dims(np.stack(letters), axis=3)
 
 
 def disp_testing(box_list):
-
     for bx in box_list:
         plt.imshow(bx)
         plt.show()
 
 
 if __name__ == "__main__":
-    # image_name = "card.jpeg"
-    # image_name = "performance.png"
-    image_name = "this_is_a_test.png"
 
-    test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
+    img_list = [
+        "performance.png",
+        "this_is_a_test.png",
+        "tesseract_sample.jpg",
+        "card.jpeg",
+        "book.png",
+    ]
 
-    chars = segmentation_test(test_image)
-    disp_testing(chars)
+    for image_name in img_list:
+        test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
+        chars = segmentation_test(test_image)
+        # disp_testing(chars)
+
+    print("Done!")
