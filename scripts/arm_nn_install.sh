@@ -14,14 +14,14 @@ BASEDIR=$(pwd)
 export BASEDIR
 echo "BASEDIR: $BASEDIR"
 
-# Create a base directory
+# Create new logs
 echo "Creating a new log file..."
 mkdir "$BASEDIR"/logs
-NOW=$(date)
-date > "out_$NOW.log"
-date > "err_$NOW.log"
+NOW=$(date "+%d-%m-%Y_%H-%M-%S")
 LOG="$BASEDIR"/logs/out_$NOW.log
 ERR="$BASEDIR"/logs/err_$NOW.log
+date > "$LOG"
+date > "$ERR"
 
 # Cmake parallel processing flag
 NUM_CORES="$(($(nproc) - 1))"

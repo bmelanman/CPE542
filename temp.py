@@ -89,7 +89,7 @@ def generate_ocr_model(filepath, epochs):
         train_ds,
         epochs=epochs,
         validation_data=test_ds,
-        callbacks=[reduce_lr]
+        callbacks=[ClearMemory, reduce_lr]
     )
 
     model.save(
