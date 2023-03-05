@@ -202,7 +202,7 @@ if __name__ == "__main__":
     # img_name = "this_is_a_test.png"
 
     # Minimum prediction confidence
-    min_conf = 0.3
+    min_conf = 0.1
 
     # Camera input flag
     camera_flag = False

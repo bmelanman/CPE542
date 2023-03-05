@@ -139,29 +139,30 @@ def segmentation_test(gray_img):
 
     cropped_img = fit(gray_img)
 
-    blured = cv2.medianBlur(cropped_img, 7)
+    blured = cv2.blur(cropped_img, (3, 3))
 
-    thresh = cv2.threshold(blured, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    # thresh = cv2.threshold(blured, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
-    kernel = np.ones((3, 3), np.uint8)
-    morph1 = cv2.morphologyEx(thresh, cv2.MORPH_DILATE, kernel, iterations=2)
+    # kernel = np.ones((3, 3), np.uint8)
+    # morph1 = cv2.morphologyEx(thresh, cv2.MORPH_DILATE, kernel, iterations=1)
     #
-    kernel = np.ones((5, 5), np.uint8)
-    morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
+    # kernel = np.ones((5, 5), np.uint8)
+    # morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
 
-    adapt_thresh = cv2.adaptiveThreshold(morph2, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
 
     disp_img(cropped_img, "cropped_img")
     disp_img(blured, "blured")
-    disp_img(thresh, "thresh")
-    disp_img(morph1, "morph1")
-    disp_img(morph2, "morph2")
+    # disp_img(thresh, "thresh")
+    # disp_img(morph1, "morph1")
+    # disp_img(morph2, "morph2")
     disp_img(adapt_thresh, "adapt_thresh")
 
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
 
     box_list = []
+    ref_img = cropped_img.copy()
     for i, c in enumerate(cnts):
         if heirs[i] != -1:
 
@@ -171,7 +172,7 @@ def segmentation_test(gray_img):
                 continue
 
             # Skip blank boxes
-            crop = morph2[y_val:y_val + h, x_val:x_val + w]
+            crop = ref_img[y_val:y_val + h, x_val:x_val + w]
             if np.min(crop) == 255 or np.max(crop) == 0:
                 continue
 
@@ -185,22 +186,26 @@ def segmentation_test(gray_img):
             bisect.insort(box_list, box)
 
     letters = []
-    cpy_img = cropped_img.copy()
     for bx in box_list:
 
-        cv2.rectangle(cpy_img, bx[t], bx[b], (0, 0, 0), thickness=4)
+        cv2.rectangle(ref_img, bx[t], bx[b], (0, 0, 0), thickness=4)
 
-        box_image = cropped_img[bx[t][y]:bx[b][y], bx[t][x]:bx[b][x]]
+        box_image = blured[bx[t][y]:bx[b][y], bx[t][x]:bx[b][x]]
         # Resize and pad the box
         letter_resize = segment.pad_resize(box_image)
         # Model prefers blurry images
-        letter_blur = cv2.bilateralFilter(letter_resize, 2, 0, 0)
+        # letter_blur = cv2.blur(letter_resize, (3, 3))
         # Add the box to the list of characters
-        letters.append(letter_blur)
+        letters.append(letter_resize)
 
-    disp_img(cpy_img, "boxes", color_map='brg')
+    disp_img(ref_img, "boxes", color_map='brg')
 
-    return np.expand_dims(np.stack(letters), axis=3)
+    letters = np.stack(letters)
+
+    if len(letters.shape) == 4:
+        return letters
+    else:
+        return np.expand_dims(letters, axis=3)
 
 
 def disp_testing(box_list):
@@ -222,6 +227,7 @@ if __name__ == "__main__":
     for image_name in img_list:
         test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
         chars = segmentation_test(test_image)
-        # disp_testing(chars)
+        disp_testing(chars)
+        input("Press any key to continue... ")
 
     print("Done!")

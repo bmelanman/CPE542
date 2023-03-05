@@ -3,7 +3,7 @@ from keras.callbacks import ReduceLROnPlateau
 from tensorflow_datasets import load
 
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input
+from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input, Dropout
 from keras.optimizers import Adam
 
 
@@ -24,13 +24,15 @@ def generate_ocr_model(filepath, epochs):
         MaxPool2D((2, 2)),
         Flatten(),
         Dense(128, activation='relu'),
+        Dropout(0.2),
+        Dense(64, activation='relu'),
         Dense(62, activation='sigmoid')
     ])
 
     # Compile the model
     model.compile(
         optimizer=Adam(
-            learning_rate=0.001,
+            learning_rate=0.005,
             epsilon=0.1
         ),
         loss='sparse_categorical_crossentropy',
@@ -62,15 +64,17 @@ def generate_ocr_model(filepath, epochs):
     train_ds = train_ds.cache()
     test_ds = test_ds.cache()
 
+    print(f"Number of Epochs: {epochs}")
+
     model.summary()
 
     input("Model ready to begin training! Press any key to begin...\n")
 
     reduce_lr = ReduceLROnPlateau(
-        monitor='val_acc',
+        monitor='val_accuracy',
         factor=0.5,
         patience=3,
-        min_lr=0.0001
+        min_lr=0.000001
     )
 
     model.fit(
@@ -86,7 +90,7 @@ def generate_ocr_model(filepath, epochs):
 
 
 if __name__ == "__main__":
-    generate_ocr_model(filepath="./models/ocr", epochs=30)
+    generate_ocr_model(filepath="./models/ocr", epochs=100)
 
 # model = Sequential([
 #     Input(shape=(28, 28, 1)),
