@@ -85,11 +85,13 @@ def generate_ocr_model(filepath, epochs):
         min_lr=0.000001
     )
 
+    mem_clean = ClearMemory()
+
     model.fit(
         train_ds,
         epochs=epochs,
         validation_data=test_ds,
-        callbacks=[ClearMemory, reduce_lr]
+        callbacks=[mem_clean, reduce_lr]
     )
 
     model.save(
