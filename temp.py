@@ -24,16 +24,16 @@ def generate_ocr_model(filepath, epochs):
     # Creating the CNN model
     model = Sequential([
         Input(shape=(28, 28, 1)),
-        Conv2D(32, (3, 3), activation='relu'),
+        Conv2D(32, (3, 3), activation='leaky_relu'),
         MaxPool2D((2, 2)),
-        Conv2D(64, (3, 3), activation='relu'),
+        Conv2D(64, (3, 3), activation='leaky_relu'),
         MaxPool2D((2, 2)),
-        Conv2D(128, (3, 3), activation='relu'),
+        Conv2D(128, (3, 3), activation='leaky_relu'),
         MaxPool2D((2, 2)),
         Flatten(),
-        Dense(128, activation='relu'),
+        Dense(128, activation='leaky_relu'),
         Dropout(0.2),
-        Dense(64, activation='relu'),
+        Dense(64, activation='leaky_relu'),
         Dense(62, activation='sigmoid')
     ])
 

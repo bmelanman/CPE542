@@ -26,7 +26,7 @@ date > "$ERR"
 # Cmake parallel processing flag
 NUM_CORES="$(($(nproc) - 1))"
 export MAKEFLAGS="--parallel $NUM_CORES"
-echo "Number of utilized cores: $NUM_CORES"
+echo "Number of utilized cores: $NUM_CORES" > "$LOG" 2> "$ERR"
 
 # Increase virtual memory swapfile allocation from 100 to 1024
 SWAP_SIZE="CONF_SWAPSIZE=100"
