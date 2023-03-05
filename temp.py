@@ -1,7 +1,9 @@
+import gc
 import tensorflow as tf
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, Callback
 from tensorflow_datasets import load
 
+from keras import backend as k
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input, Dropout
 from keras.optimizers import Adam
@@ -10,6 +12,12 @@ from keras.optimizers import Adam
 def normalize_img(image, label):
     # Normalizes images and casts image data to float32
     return tf.cast(image, tf.float32) / 255., label
+
+
+class ClearMemory(Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
+        k.clear_session()
 
 
 def generate_ocr_model(filepath, epochs):

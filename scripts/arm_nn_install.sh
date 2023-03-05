@@ -5,6 +5,24 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
+# Create a base directory
+echo "Creating a base directory..."
+mkdir armnn-install
+cd armnn-install || exit 1
+
+BASEDIR=$(pwd)
+export BASEDIR
+echo "BASEDIR: $BASEDIR"
+
+# Create a base directory
+echo "Creating a new log file..."
+mkdir "$BASEDIR"/logs
+NOW=$(date)
+date > "out_$NOW.log"
+date > "err_$NOW.log"
+LOG="$BASEDIR"/logs/out_$NOW.log
+ERR="$BASEDIR"/logs/err_$NOW.log
+
 # Cmake parallel processing flag
 NUM_CORES="$(($(nproc) - 1))"
 export MAKEFLAGS="--parallel $NUM_CORES"
@@ -20,20 +38,13 @@ if ! grep -Fxq "$SWAP_SIZE" /etc/dphys-swapfile; then
   echo "Done!"
 fi
 
-# Install SCONS and CMAKE
-echo "Checking for updates and installing various tools..."
+# Install various things
+echo "Checking for updates and installing various tools and packages..."
 apt-get update
-apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev
+apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev python3.6-dev build-essential checkinstall \
+  libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev \
+  libcblas-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test
 echo "Done!"
-
-# Create a base directory
-echo "Creating a base directory..."
-mkdir armnn-install
-cd armnn-install || exit 1
-
-BASEDIR=$(pwd)
-export BASEDIR
-echo "BASEDIR: $BASEDIR"
 
 # Install ComputeLib
 echo "Downloading ComputeLibrary..."
@@ -168,9 +179,6 @@ ARMNN_LIB="$BASEDIR"/armnn/build/
 export SWIG_EXECUTABLE ARMNN_INCLUDE ARMNN_LIB
 
 cd "$BASEDIR"/armnn/python/pyarmnn || exit 1
-apt-get install -y python3.6-dev build-essential checkinstall libreadline-gplv2-dev libncursesw5-dev libssl-dev \
-  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libcblas-dev libhdf5-dev \
-  libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test
 
 python3 setup.py clean --all
 python3 swig_generate.py -v

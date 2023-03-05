@@ -1,8 +1,16 @@
-#!/bin/zsh
+#!/bin/zsh -e
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root!"
-  exit
-fi
+# Create a base directory
+BASEDIR=.
+echo "Creating a new log file..."
+mkdir logs
+NOW=$(date "+%d-%m-%Y_%H-%M-%S")
+LOG="$BASEDIR"/logs/out_$NOW.log
+ERR="$BASEDIR"/logs/err_$NOW.log
 
-sed -i '' -e 's/BASH-no/watermelon/g' /etc/_test_profile && cat /etc/_test_profile
+date > "$LOG"
+date > "$ERR"
+echo logging... > "$LOGS"
+
+cat "$LOG"
+cat "$ERR"
