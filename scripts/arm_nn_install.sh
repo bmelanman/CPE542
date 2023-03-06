@@ -95,8 +95,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/ComputeLibrary" ]; then
     git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
   else
-    git -C "$BASEDIR"/ComputeLibrary config pull.rebase false
-    git -C "$BASEDIR"/ComputeLibrary pull
+    git -C "$BASEDIR"/ComputeLibrary fetch && git -C "$BASEDIR"/ComputeLibrary merge
   fi
   cd "$BASEDIR"/ComputeLibrary || exit 1
   echo "Installing ComputeLibrary..."
@@ -110,7 +109,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/protobuf" ]; then
     git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
   else
-    git -C "$BASEDIR"/protobuf pull 
+    git -C "$BASEDIR"/protobuf fetch && git -C "$BASEDIR"/protobuf merge
   fi
   cd "$BASEDIR"/protobuf || exit 1
   git submodule update --init --recursive
@@ -146,15 +145,13 @@ run_prog() {
   if [ ! -d "$BASEDIR/armnn" ]; then
     git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
   else
-    git -C "$BASEDIR"/armnn config pull.rebase false
-    git -C "$BASEDIR"/armnn pull
+    git -C "$BASEDIR"/armnn fetch && git -C "$BASEDIR"/armnn merge
   fi
   echo "Downloading TensorFlow..."
   if [ ! -d "$BASEDIR/tensorflow" ]; then
     git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
   else
-    git -C "$BASEDIR"/tensorflow config pull.rebase false
-    git -C "$BASEDIR"/tensorflow pull
+    git -C "$BASEDIR"/tensorflow fetch && git -C "$BASEDIR"/tensorflow merge
   fi
   cd "$BASEDIR"/tensorflow || exit 1
   git checkout 590d6eef7e91a6a7392c8ffffb7b58f2e0c8bc6b
@@ -162,8 +159,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/flatbuffers" ]; then
     git clone https://github.com/google/flatbuffers.git ./flatbuffers
   else
-    git -C "$BASEDIR"/flatbuffers config pull.rebase false
-    git -C ./flatbuffers pull
+    git -C "$BASEDIR"/flatbuffers fetch && git -C "$BASEDIR"/flatbuffers merge
   fi
   echo "Configuring TensorFlow and Protobuf"
   ./"$BASEDIR"/armnn/scripts/generate_tensorflow_protobuf.sh ../tensorflow-protobuf ../protobuf-host
@@ -175,8 +171,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/flatbuffers" ]; then
     git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
   else
-    git -C "$BASEDIR"/tensorflow config pull.rebase false
-    git -C "$BASEDIR"/flatbuffers pull
+    git -C "$BASEDIR"/flatbuffers fetch && git -C "$BASEDIR"/flatbuffers merge
   fi
   echo "Downloading FlatBuffers..."
   cd "$BASEDIR"/flatbuffers || exit 1
@@ -195,8 +190,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/swig" ]; then
     git clone https://github.com/swig/swig.git "$BASEDIR"/swig
   else
-    git -C "$BASEDIR"/tensorflow config pull.rebase false
-    git -C "$BASEDIR"/swig pull
+    git -C "$BASEDIR"/swig fetch && git -C "$BASEDIR"/swig merge
   fi
   cd "$BASEDIR"/swig || exit 1
   echo "Configuring SWIG..."
