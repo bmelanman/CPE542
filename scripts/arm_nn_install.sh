@@ -110,8 +110,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/protobuf" ]; then
     git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
   else
-    git -C "$BASEDIR"/protobuf config pull.rebase false
-    git -C "$BASEDIR"/protobuf pull
+    git -C "$BASEDIR"/protobuf pull 
   fi
   cd "$BASEDIR"/protobuf || exit 1
   git submodule update --init --recursive
