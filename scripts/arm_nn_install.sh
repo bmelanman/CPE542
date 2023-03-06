@@ -36,7 +36,6 @@ spinner() {
 }
 
 make_basedir() {
-
   # Create a base directory
   echo "Creating a base directory..."
   mkdir -m 777 -p armnn-install
