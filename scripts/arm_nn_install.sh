@@ -5,6 +5,9 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
+SUCCESS="$(true)"
+FAILURE="$(true)"
+
 cleanup() {
   rv=$?
   exec 1>&5
@@ -28,6 +31,8 @@ spinner() {
     sleep 1
   done
   printf "\b"
+
+  return "$SUCCESS"
 }
 
 make_basedir() {
@@ -50,7 +55,8 @@ make_basedir() {
   chmod 777 "$LOG" "$ERR"
   echo "Done!"
   echo "Logs can be found at \"$BASEDIR/logs\""
-  return "$(true)"
+
+  return "$SUCCESS"
 }
 
 run_prog() {
@@ -234,6 +240,8 @@ run_prog() {
   apt-get install libjasper-dev
   apt-get install libqtgui4
   apt-get install libqt4-test
+
+  return "$SUCCESS"
 }
 
 make_basedir
