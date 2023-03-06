@@ -2,11 +2,19 @@ import gc
 import tensorflow as tf
 from keras.callbacks import ReduceLROnPlateau, Callback
 from tensorflow_datasets import load
+import os
 
 from keras import backend as k
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input, Dropout
 from keras.optimizers import Adam
+
+
+if os.name == "nt":
+    num_threads = os.cpu_count()
+    if num_threads >= 1:
+        tf.config.threading.set_inter_op_parallelism_threads(num_threads)
+        tf.config.threading.set_intra_op_parallelism_threads(num_threads)
 
 
 def normalize_img(image, label):
@@ -59,13 +67,13 @@ def generate_ocr_model(filepath, epochs):
     # Preprocess data
     train_ds = train_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.transpose(image), label)) \
+        .map(lambda image, label: (tf.image.transpose(image), label), num_parallel_calls=tf.data.AUTOTUNE) \
         .shuffle(1000) \
         .prefetch(tf.data.AUTOTUNE)
 
     test_ds = test_ds \
         .map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE) \
-        .map(lambda image, label: (tf.image.transpose(image), label)) \
+        .map(lambda image, label: (tf.image.transpose(image), label), num_parallel_calls=tf.data.AUTOTUNE) \
         .shuffle(100) \
         .prefetch(tf.data.AUTOTUNE)
 
