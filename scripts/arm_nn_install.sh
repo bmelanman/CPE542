@@ -5,9 +5,6 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-SUCCESS="$(true)"
-FAILURE="$(true)"
-
 cleanup() {
   rv=$?
   exec 1>&5
@@ -32,7 +29,7 @@ spinner() {
   done
   printf "\b"
 
-  return "$SUCCESS"
+  return 0
 }
 
 make_basedir() {
@@ -55,7 +52,7 @@ make_basedir() {
   echo "Done!"
   echo "Logs can be found at \"$BASEDIR/logs\""
 
-  return "$SUCCESS"
+  return 0
 }
 
 run_prog() {
@@ -240,7 +237,7 @@ run_prog() {
   apt-get install libqtgui4
   apt-get install libqt4-test
 
-  return "$SUCCESS"
+  return 0
 }
 
 make_basedir
