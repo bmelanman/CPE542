@@ -62,6 +62,9 @@ disp_msg() {
 }
 
 run_prog() {
+  # redirect stdout/stderr to log files
+  exec 5>&1 >>"$LOG" 2>>"$ERR"
+
   # Set cleanup on exit
   trap 'cleanup' EXIT
 
@@ -252,9 +255,6 @@ run_prog() {
 
   return 0
 }
-
-# redirect stdout/stderr to log files
-exec 5>&1 >>"$LOG" 2>>"$ERR"
 
 # Set up root directory
 make_basedir
