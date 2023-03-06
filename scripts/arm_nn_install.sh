@@ -92,7 +92,9 @@ run_prog() {
   # Install ComputeLib
   disp_msg "Installing ComputeLibrary..."
   echo "Downloading ComputeLibrary..."
-  git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
+  if [ ! -d "$BASEDIR/ComputeLibrary" ] ; then
+    git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
+  fi
   cd "$BASEDIR"/ComputeLibrary || exit 1
   echo "Installing ComputeLibrary..."
   scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 -j$NUM_CORES
@@ -101,7 +103,9 @@ run_prog() {
   # Install Protobuf
   disp_msg "Installing Protobuf..."
   echo "Downloading Protobuf..."
-  git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
+  if [ ! -d "$BASEDIR/protobuf" ] ; then
+    git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
+  fi
   cd "$BASEDIR"/protobuf || exit 1
   git submodule update --init --recursive
   echo "Configuring Protobuf..."
@@ -117,7 +121,7 @@ run_prog() {
   echo "Downloading Boost..."
   LOCATION=$(curl -s https://api.github.com/repos/boostorg/boost/releases/latest | grep "zipball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
   curl -L -o "$BASEDIR"/boost_latest.tar.xz "$LOCATION"
-  tar xf "$BASEDIR"/boost_latest.tar.xz
+  tar xf "$BASEDIR"/boost_latest
   cd "$BASEDIR"/boost_latest || exit 1
   echo "Installing Boost..."
   ./bootstrap.sh
@@ -133,7 +137,9 @@ run_prog() {
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
   echo "Downloading ArmNN..."
-  git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
+  if [ ! -d "$BASEDIR/armnn" ] ; then
+    git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
+  fi
   echo "Downloading TensorFlow..."
   git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
   cd "$BASEDIR"/tensorflow || exit 1
@@ -147,7 +153,9 @@ run_prog() {
   # Download and install FlatBuffers
   disp_msg "Installing FlatBuffers..."
   echo "Downloading FlatBuffers"
-  git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
+  if [ ! -d "$BASEDIR/flatbuffers" ] ; then
+    git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
+  fi
   echo "Downloading FlatBuffers..."
   cd "$BASEDIR"/flatbuffers || exit 1
   echo "Installing FlatBuffers..."
@@ -162,7 +170,9 @@ run_prog() {
   #Install SWIG
   disp_msg "Installing SWIG..."
   echo "Downloading SWIG..."
-  git clone https://github.com/swig/swig.git "$BASEDIR"/swig
+  if [ ! -d "$BASEDIR/swig" ] ; then
+    git clone https://github.com/swig/swig.git "$BASEDIR"/swig
+  fi
   cd "$BASEDIR"/swig || exit 1
   echo "Configuring SWIG..."
   ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
