@@ -123,7 +123,7 @@ run_prog() {
   echo "Downloading Boost..."
   LOCATION=$(curl -s https://api.github.com/repos/boostorg/boost/releases/latest | grep "zipball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
   curl -L -o "$BASEDIR"/boost_latest.tar.gz "$LOCATION"
-  sudo unzip "$BASEDIR"/boost_latest.tar.gz -d "$BASEDIR"/boost_latest
+  unzip -o "$BASEDIR"/boost_latest.tar.gz -d "$BASEDIR"/boost_latest
   cd "$BASEDIR"/boost_latest || exit 1
   echo "Installing Boost..."
   ./bootstrap.sh
