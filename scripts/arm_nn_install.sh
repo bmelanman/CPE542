@@ -59,6 +59,18 @@ disp_msg() {
   return 0
 }
 
+download_lib() {
+  echo "Downloading @1..."
+  if [ ! -d "$BASEDIR/@1" ]; then
+    git clone @2 "$BASEDIR"/@1 || return 1
+  else
+    (git -C "$BASEDIR"/@1 fetch && git -C "$BASEDIR"/@1 merge) || return 1
+  fi
+  cd "$BASEDIR"/@1 || return 1
+
+  return 0
+}
+
 run_prog() {
   # redirect stdout/stderr to log files
   exec 5>&1 >>"$LOG" 2>>"$ERR"
@@ -91,27 +103,14 @@ run_prog() {
 
   # Install ComputeLib
   disp_msg "Installing ComputeLibrary..."
-  echo "Downloading ComputeLibrary..."
-  if [ ! -d "$BASEDIR/ComputeLibrary" ]; then
-    git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
-  else
-    git -C "$BASEDIR"/ComputeLibrary fetch && git -C "$BASEDIR"/ComputeLibrary merge
-  fi
-  cd "$BASEDIR"/ComputeLibrary || exit 1
-  echo "Installing ComputeLibrary..."
+  download_lib "ComputeLibrary" "https://github.com/Arm-software/ComputeLibrary.git"
   scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
     -j$NUM_CORES
   echo "Done!"
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-  echo "Downloading Protobuf..."
-  if [ ! -d "$BASEDIR/protobuf" ]; then
-    git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
-  else
-    git -C "$BASEDIR"/protobuf fetch && git -C "$BASEDIR"/protobuf merge
-  fi
-  cd "$BASEDIR"/protobuf || exit 1
+  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
   git submodule update --init --recursive
   echo "Configuring Protobuf..."
   ./autogen.sh
@@ -141,40 +140,24 @@ run_prog() {
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
-  echo "Downloading ArmNN..."
-  if [ ! -d "$BASEDIR/armnn" ]; then
-    git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
-  else
-    git -C "$BASEDIR"/armnn fetch && git -C "$BASEDIR"/armnn merge
-  fi
-  echo "Downloading TensorFlow..."
-  if [ ! -d "$BASEDIR/tensorflow" ]; then
-    git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
-  else
-    git -C "$BASEDIR"/tensorflow fetch && git -C "$BASEDIR"/tensorflow merge
-  fi
-  cd "$BASEDIR"/tensorflow || exit 1
+
+  download_lib "armnn" "https://github.com/Arm-software/armnn"
+
+  download_lib "tensorflow" "https://github.com/tensorflow/tensorflow.git"
   git checkout 590d6eef7e91a6a7392c8ffffb7b58f2e0c8bc6b
-  echo "Downloading FlatBuffers for TF..."
-  if [ ! -d "$BASEDIR/flatbuffers" ]; then
-    git clone https://github.com/google/flatbuffers.git ./flatbuffers
-  else
-    git -C "$BASEDIR"/flatbuffers fetch && git -C "$BASEDIR"/flatbuffers merge
-  fi
+
+  download_lib "tensorflow/flatbuffers" "https://github.com/google/flatbuffers.git"
+
   echo "Configuring TensorFlow and Protobuf"
   ./"$BASEDIR"/armnn/scripts/generate_tensorflow_protobuf.sh ../tensorflow-protobuf ../protobuf-host
+
   echo "Done!"
 
   # Download and install FlatBuffers
   disp_msg "Installing FlatBuffers..."
-  echo "Downloading FlatBuffers"
-  if [ ! -d "$BASEDIR/flatbuffers" ]; then
-    git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
-  else
-    git -C "$BASEDIR"/flatbuffers fetch && git -C "$BASEDIR"/flatbuffers merge
-  fi
-  echo "Downloading FlatBuffers..."
-  cd "$BASEDIR"/flatbuffers || exit 1
+
+  download_lib "flatbuffers" "https://github.com/google/flatbuffers.git"
+
   echo "Installing FlatBuffers..."
   cmake -G "Unix Makefiles" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -182,43 +165,49 @@ run_prog() {
     -DFLATBUFFERS_BUILD_FLATC=1 \
     -DCMAKE_INSTALL_PREFIX:PATH="$BASEDIR"/flatbuffers-1.12.0 -DFLATBUFFERS_BUILD_TESTS=0
   make -j$NUM_CORES
+
   echo "Done!"
 
   #Install SWIG
   disp_msg "Installing SWIG..."
-  echo "Downloading SWIG..."
-  if [ ! -d "$BASEDIR/swig" ]; then
-    git clone https://github.com/swig/swig.git "$BASEDIR"/swig
-  else
-    git -C "$BASEDIR"/swig fetch && git -C "$BASEDIR"/swig merge
-  fi
-  cd "$BASEDIR"/swig || exit 1
+
+  download_lib "swig" "https://github.com/swig/swig.git"
+
   echo "Configuring SWIG..."
   ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
+
   echo "Installing SWIG..."
   make -j$NUM_CORES
   make install -j$NUM_CORES
+
   echo "Done!"
 
   # Add lines to /etc/profile if necessary
   echo "Updating \"/etc/profile\"..."
+
   ADD_SWIG_PATH="export SWIG_PATH=/home/pi/armnn-tflite/swigtool/bin"
   ADD_PATH="export PATH=$SWIG_PATH:$PATH"
+
   if ! grep -Fxq "$ADD_SWIG_PATH" /etc/profile; then
     echo "$ADD_SWIG_PATH" >>/etc/profile
   fi
   if ! grep -Fxq "$ADD_PATH" /etc/profile; then
     echo "$ADD_PATH" >>/etc/profile
   fi
+
   source /etc/profile
+
   echo "Done!"
 
   # Build Arm NN
   disp_msg "Installing ArmNN..."
+
   echo "Building ArmNN"
+
   # shellcheck disable=SC2174
   mkdir -m 777 -p "$BASEDIR"/armnn/build
   cd "$BASEDIR"/armnn/build || exit 1
+
   echo "Making base libraries..."
   cmake .. \
     -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
@@ -242,13 +231,16 @@ run_prog() {
   # shellcheck disable=SC2174
   mkdir -m 777 -p "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build
   cd "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build || exit 1
+
   echo "Making Boost libraries..."
   cmake .. -DBOOST_ROOT="$BASEDIR"/boost \
     -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a \
     -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a \
     -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
+
   echo "Installing Boost libraries..."
   make -j$NUM_CORES
+
   echo "Done!"
 
   # Install PyArmNN
