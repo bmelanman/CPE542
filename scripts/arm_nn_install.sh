@@ -9,7 +9,7 @@ cleanup() {
   rv=$?
   exec 1>&5
   if [ $rv -ne 0 ]; then
-    echo "An error has occurred, "
+    printf "\rAn error has occurred! Error log:"
     cat "$ERR"
   else
     printf "Done!\n"
@@ -26,7 +26,7 @@ spinner() {
     printf "\r%s" "${spin:$i:1}"
     sleep 1
   done
-  printf "\r"
+  printf "\b"
 
   return 0
 }
@@ -121,7 +121,7 @@ run_prog() {
   echo "Downloading Boost..."
   LOCATION=$(curl -s https://api.github.com/repos/boostorg/boost/releases/latest | grep "zipball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
   curl -L -o "$BASEDIR"/boost_latest.tar.xz "$LOCATION"
-  tar xf "$BASEDIR"/boost_latest
+  tar xf "$BASEDIR"/boost_latest.tar.xz
   cd "$BASEDIR"/boost_latest || exit 1
   echo "Installing Boost..."
   ./bootstrap.sh
