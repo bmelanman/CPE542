@@ -92,20 +92,25 @@ run_prog() {
   # Install ComputeLib
   disp_msg "Installing ComputeLibrary..."
   echo "Downloading ComputeLibrary..."
-  if [ ! -d "$BASEDIR/ComputeLibrary" ] ; then
+  if [ ! -d "$BASEDIR/ComputeLibrary" ]; then
     git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
+  else
+    git -C "$BASEDIR"/ComputeLibrary config pull.rebase false
+    git -C "$BASEDIR"/ComputeLibrary pull
   fi
   cd "$BASEDIR"/ComputeLibrary || exit 1
   echo "Installing ComputeLibrary..."
-  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 -j$NUM_CORES
+  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
+    -j$NUM_CORES
   echo "Done!"
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
   echo "Downloading Protobuf..."
-  if [ ! -d "$BASEDIR/protobuf" ] ; then
+  if [ ! -d "$BASEDIR/protobuf" ]; then
     git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
   else
+    git -C "$BASEDIR"/protobuf config pull.rebase false
     git -C "$BASEDIR"/protobuf pull
   fi
   cd "$BASEDIR"/protobuf || exit 1
@@ -139,19 +144,26 @@ run_prog() {
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
   echo "Downloading ArmNN..."
-  if [ ! -d "$BASEDIR/armnn" ] ; then
+  if [ ! -d "$BASEDIR/armnn" ]; then
     git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
   else
+    git -C "$BASEDIR"/armnn config pull.rebase false
     git -C "$BASEDIR"/armnn pull
   fi
   echo "Downloading TensorFlow..."
-  git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
+  if [ ! -d "$BASEDIR/tensorflow" ]; then
+    git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
+  else
+    git -C "$BASEDIR"/tensorflow config pull.rebase false
+    git -C "$BASEDIR"/tensorflow pull
+  fi
   cd "$BASEDIR"/tensorflow || exit 1
   git checkout 590d6eef7e91a6a7392c8ffffb7b58f2e0c8bc6b
   echo "Downloading FlatBuffers for TF..."
-  if [ ! -d "$BASEDIR/armnn" ] ; then
+  if [ ! -d "$BASEDIR/flatbuffers" ]; then
     git clone https://github.com/google/flatbuffers.git ./flatbuffers
   else
+    git -C "$BASEDIR"/flatbuffers config pull.rebase false
     git -C ./flatbuffers pull
   fi
   echo "Configuring TensorFlow and Protobuf"
@@ -161,9 +173,10 @@ run_prog() {
   # Download and install FlatBuffers
   disp_msg "Installing FlatBuffers..."
   echo "Downloading FlatBuffers"
-  if [ ! -d "$BASEDIR/flatbuffers" ] ; then
+  if [ ! -d "$BASEDIR/flatbuffers" ]; then
     git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
   else
+    git -C "$BASEDIR"/tensorflow config pull.rebase false
     git -C "$BASEDIR"/flatbuffers pull
   fi
   echo "Downloading FlatBuffers..."
@@ -180,9 +193,10 @@ run_prog() {
   #Install SWIG
   disp_msg "Installing SWIG..."
   echo "Downloading SWIG..."
-  if [ ! -d "$BASEDIR/swig" ] ; then
+  if [ ! -d "$BASEDIR/swig" ]; then
     git clone https://github.com/swig/swig.git "$BASEDIR"/swig
   else
+    git -C "$BASEDIR"/tensorflow config pull.rebase false
     git -C "$BASEDIR"/swig pull
   fi
   cd "$BASEDIR"/swig || exit 1
