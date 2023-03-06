@@ -106,7 +106,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/protobuf" ] ; then
     git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
   else
-    git pull -C "$BASEDIR"/protobuf
+    git -C "$BASEDIR"/protobuf pull
   fi
   cd "$BASEDIR"/protobuf || exit 1
   git submodule update --init --recursive
@@ -142,7 +142,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/armnn" ] ; then
     git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
   else
-    git pull -C "$BASEDIR"/armnn
+    git -C "$BASEDIR"/armnn pull
   fi
   echo "Downloading TensorFlow..."
   git clone https://github.com/tensorflow/tensorflow.git "$BASEDIR"/tensorflow
@@ -152,7 +152,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/armnn" ] ; then
     git clone https://github.com/google/flatbuffers.git ./flatbuffers
   else
-    git pull -C ./flatbuffers
+    git -C ./flatbuffers pull
   fi
   echo "Configuring TensorFlow and Protobuf"
   ./"$BASEDIR"/armnn/scripts/generate_tensorflow_protobuf.sh ../tensorflow-protobuf ../protobuf-host
@@ -164,7 +164,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/flatbuffers" ] ; then
     git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
   else
-    git pull -C "$BASEDIR"/flatbuffers
+    git -C "$BASEDIR"/flatbuffers pull
   fi
   echo "Downloading FlatBuffers..."
   cd "$BASEDIR"/flatbuffers || exit 1
@@ -183,7 +183,7 @@ run_prog() {
   if [ ! -d "$BASEDIR/swig" ] ; then
     git clone https://github.com/swig/swig.git "$BASEDIR"/swig
   else
-    git pull -C "$BASEDIR"/swig
+    git -C "$BASEDIR"/swig pull
   fi
   cd "$BASEDIR"/swig || exit 1
   echo "Configuring SWIG..."
