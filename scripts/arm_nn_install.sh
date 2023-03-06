@@ -21,18 +21,19 @@ spinner() {
   pid=$! # Process Id of the previous running command
   spin='-\|/'
   i=0
-  while kill -0 $pid 2>/dev/null
-  do
-    i=$(( (i+1) %4 ))
+  while kill -0 $pid 2>/dev/null; do
+    i=$(((i + 1) % 4))
     printf "\r%s" "${spin:$i:1}"
     sleep 1
   done
-  printf "\b"
+  printf "\r"
 
   return 0
 }
 
 make_basedir() {
+  disp_msg "Setting things up..."
+
   # Create a base directory
   echo "Creating a base directory..."
   mkdir -m 777 -p armnn-install
@@ -55,10 +56,12 @@ make_basedir() {
   return 0
 }
 
-run_prog() {
-  # redirect stdout/stderr to log files
-  exec 5>&1 >>"$LOG" 2>>"$ERR"
+disp_msg() {
+  printf "\r%s\n" "$@" >&5
+  return 0
+}
 
+run_prog() {
   # Set cleanup on exit
   trap 'cleanup' EXIT
 
@@ -78,6 +81,7 @@ run_prog() {
   fi
 
   # Install various things
+  disp_msg "Installing necessary tools..."
   echo "Checking for updates and installing various tools and packages..."
   apt-get update
   apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev build-essential checkinstall libncursesw5-dev \
@@ -85,6 +89,7 @@ run_prog() {
   echo "Done!"
 
   # Install ComputeLib
+  disp_msg "Installing ComputeLibrary..."
   echo "Downloading ComputeLibrary..."
   git clone https://github.com/Arm-software/ComputeLibrary.git "$BASEDIR"/ComputeLibrary
   cd "$BASEDIR"/ComputeLibrary || exit 1
@@ -93,19 +98,21 @@ run_prog() {
   echo "Done!"
 
   # Install Protobuf
-  echo "Downloading ComputeLibrary..."
+  disp_msg "Installing Protobuf..."
+  echo "Downloading Protobuf..."
   git clone -b v3.5.0 https://github.com/google/protobuf.git "$BASEDIR"/protobuf
   cd "$BASEDIR"/protobuf || exit 1
   git submodule update --init --recursive
-  echo "Configuring ComputeLibrary..."
+  echo "Configuring Protobuf..."
   ./autogen.sh
   ./configure --prefix="$BASEDIR"/protobuf-host
-  echo "Installing ComputeLibrary..."
+  echo "Installing Protobuf..."
   make -j$NUM_CORES
   make install -j$NUM_CORES
   echo "Done!"
 
   # Install Boost
+  disp_msg "Installing Boost..."
   echo "Downloading Boost..."
   LOCATION=$(curl -s https://api.github.com/repos/boostorg/boost/releases/latest | grep "zipball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
   curl -L -o "$BASEDIR"/boost_latest.tar.xz "$LOCATION"
@@ -123,6 +130,7 @@ run_prog() {
   echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
+  disp_msg "Installing TensorFlow..."
   echo "Downloading ArmNN..."
   git clone https://github.com/Arm-software/armnn "$BASEDIR"/armnn
   echo "Downloading TensorFlow..."
@@ -136,7 +144,8 @@ run_prog() {
   echo "Done!"
 
   # Download and install FlatBuffers
-  echo "Downloading "
+  disp_msg "Installing FlatBuffers..."
+  echo "Downloading FlatBuffers"
   git clone https://github.com/google/flatbuffers.git "$BASEDIR"/flatbuffers
   echo "Downloading FlatBuffers..."
   cd "$BASEDIR"/flatbuffers || exit 1
@@ -150,12 +159,13 @@ run_prog() {
   echo "Done!"
 
   #Install SWIG
-  echo "Downloading FlatBuffers..."
+  disp_msg "Installing SWIG..."
+  echo "Downloading SWIG..."
   git clone https://github.com/swig/swig.git "$BASEDIR"/swig
   cd "$BASEDIR"/swig || exit 1
-  echo "Configuring FlatBuffers..."
+  echo "Configuring SWIG..."
   ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
-  echo "Installing FlatBuffers..."
+  echo "Installing SWIG..."
   make -j$NUM_CORES
   make install -j$NUM_CORES
   echo "Done!"
@@ -174,6 +184,7 @@ run_prog() {
   echo "Done!"
 
   # Build Arm NN
+  disp_msg "Installing ArmNN..."
   echo "Building ArmNN"
   # shellcheck disable=SC2174
   mkdir -m 777 -p "$BASEDIR"/armnn/build
@@ -213,6 +224,8 @@ run_prog() {
   # Install PyArmNN
   # Following instructions for "Standalone build" from:
   # https://git.mlplatform.org/ml/armnn.git/tree/python/pyarmnn/README.md
+  disp_msg "Setting up python libraries..."
+
   SWIG_EXECUTABLE="$BASEDIR"/swigtool/bin/swig
   ARMNN_INCLUDE="$BASEDIR"/armnn/include/
   ARMNN_LIB="$BASEDIR"/armnn/build/
@@ -240,5 +253,12 @@ run_prog() {
   return 0
 }
 
+# redirect stdout/stderr to log files
+exec 5>&1 >>"$LOG" 2>>"$ERR"
+
+# Set up root directory
 make_basedir
-run_prog & spinner
+
+# run the installer along with a simple spinner
+run_prog &
+spinner

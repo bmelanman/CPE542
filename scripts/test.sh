@@ -2,12 +2,10 @@
 
 cleanup() {
   rv=$?
-  exec 1>&5
   if [ $rv -ne 0 ]; then
-    echo "An error has occurred, "
-    cat "$ERR"
+    printf "Error!\n"
   else
-    printf "Done!\n"
+    printf "exiting...\n"
   fi
   exit $rv
 }
@@ -23,6 +21,7 @@ spinner() {
     sleep 1
   done
   printf "\b"
+  return 0
 }
 
 make_basedir() {
@@ -34,23 +33,35 @@ make_basedir() {
   NOW=$(date "+%d-%m-%Y_%H-%M-%S")
   LOG="$BASEDIR"/logs/out_$NOW.log
   ERR="$BASEDIR"/logs/err_$NOW.log
-  date >>"$LOG"
-  date >>"$ERR"
+  rm ./logs/*.log
+  date >"$LOG"
+  date >"$ERR"
   chmod 777 "$LOG" "$ERR"
   echo "Done!"
   echo "Logs can be found at \"$BASEDIR/logs\""
-  return "$(true)"
+  return 0
+}
+
+disp_msg() {
+  printf "\r%s\n" "$@" >&5
+  return 0
 }
 
 testing() {
   # redirect stdout/stderr to a file
   exec 5>&1 >>"$LOG" 2>>"$ERR"
+  disp_msg "pipes redirected"
 
   # Set cleanup trigger
   trap 'cleanup' EXIT
+  disp_msg "trap enabled"
 
   /usr/bin/python3 ~/Code/GitHub/CSC202/project2-bmelanman/big_O_test.py
+  disp_msg "python finished"
+
+  return 0
 }
 
 make_basedir
-sleep 5 & spinner
+
+testing & spinner
