@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root!"
@@ -26,17 +26,14 @@ cleanup() {
 }
 
 spinner() {
-  local max_cycles=10
-  local spin="-\|/"
+  local spin="Waiting..."
 
   while :; do
-    for _ in $(seq 0 1 $max_cycles); do
-      for i in $(seq 0 1 ${#spin}); do
-        printf "%s" "${spin:i:1}"
-        sleep 1
-      done
+    for i in $(seq 0 1 ${#spin}); do
+      printf "%s" "${spin:i:1}"
+      sleep 1
     done
-    printf "\r"
+    printf "\r                      \r"
   done
 
   return 0
