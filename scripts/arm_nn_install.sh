@@ -40,7 +40,7 @@ spinner() {
 }
 
 disp_msg() {
-  printf "\r\n%s\n" "$@" >&5
+  printf "\r%s\n" "$@" >&5
   return 0
 }
 
