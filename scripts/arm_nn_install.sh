@@ -79,8 +79,8 @@ download_lib() {
     return 0
   fi
 
-  if [ "$#" -ne 4 ]; then
-    3="--"
+  if [ "$#" -ne 3 ]; then
+    ((3="--"))
   fi
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
