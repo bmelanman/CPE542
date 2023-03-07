@@ -1,3 +1,5 @@
 keras
 tensorflow
 tensorflow_datasets
+numpy
+opencv-python

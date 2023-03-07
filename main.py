@@ -100,7 +100,6 @@ def display_results(input_data, prediction_data, pred_min: float):
 
 
 def main(camera, img_path, tflite_model_location, pred_min: float):
-
     if camera:
         # Get image from camera
         test_image = camera_input()
@@ -126,7 +125,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float):
     arm_nn_delegate = None
     if is_raspberrypi():
         arm_nn_delegate = tf.lite.experimental.load_delegate(
-            library="",                                                         # TODO: Install library on raspberry pi
+            library="",  # TODO: Install library on raspberry pi
             options={
                 "backends": "CpuAcc,GpuAcc,CpuRef",
                 "logging-severity": "info"
@@ -197,12 +196,17 @@ if __name__ == "__main__":
 
     # Specify test image input
     img_folder = "./test_images/"
-    # img_name = "card.jpeg"
-    img_name = "performance.png"
-    # img_name = "this_is_a_test.png"
+    img_list = [
+        "performance.png",
+        "this_is_a_test.png",
+        "tesseract_sample.jpg",
+        "card.jpeg",
+        "book.png",
+    ]
+    i = -1
 
     # Minimum prediction confidence
-    min_conf = 0.1
+    min_conf = 0.51
 
     # Camera input flag
     camera_flag = False
@@ -221,10 +225,14 @@ if __name__ == "__main__":
     if create_new_model_flag or load_new_model_flag:
         tf2tflite(tf_model_path, tflite_model_path)
 
-    # Run!
-    main(
-        camera=camera_flag,
-        img_path=img_folder + img_name,
-        tflite_model_location=tflite_model_path,
-        pred_min=min_conf
-    )
+    if i >= 0:
+        img_list = [img_list[i]]
+
+    for img_name in img_list:
+        # Run!
+        main(
+            camera=camera_flag,
+            img_path=img_folder + img_name,
+            tflite_model_location=tflite_model_path,
+            pred_min=min_conf
+        )

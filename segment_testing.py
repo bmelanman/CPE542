@@ -116,7 +116,7 @@ def fit(gray_img):
 
 
 def is_intersecting(box0, box_list):
-    for idx, box1 in enumerate(box_list):
+    for idx, (box1, img) in enumerate(box_list):
         if not (box1[t][x] > box0[b][x]) \
                 and not (box0[t][x] > box1[b][x]) \
                 and not (box1[t][y] > box0[b][y]) \
@@ -139,29 +139,29 @@ def segmentation_test(gray_img):
 
     cropped_img = fit(gray_img)
 
+    thresh = cv2.threshold(cropped_img, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
     blured = cv2.blur(cropped_img, (3, 3))
 
-    # thresh = cv2.threshold(blured, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    kernel = np.ones((3, 3), np.uint8)
+    morph1 = cv2.morphologyEx(blured, cv2.MORPH_DILATE, kernel)
 
-    # kernel = np.ones((3, 3), np.uint8)
-    # morph1 = cv2.morphologyEx(thresh, cv2.MORPH_DILATE, kernel, iterations=1)
-    #
-    # kernel = np.ones((5, 5), np.uint8)
-    # morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
+    kernel = np.ones((5, 5), np.uint8)
+    morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
 
-    adapt_thresh = cv2.adaptiveThreshold(blured, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+    adapt_thresh = cv2.adaptiveThreshold(morph2, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
 
     disp_img(cropped_img, "cropped_img")
     disp_img(blured, "blured")
     # disp_img(thresh, "thresh")
-    # disp_img(morph1, "morph1")
-    # disp_img(morph2, "morph2")
+    disp_img(morph1, "morph1")
+    disp_img(morph2, "morph2")
     disp_img(adapt_thresh, "adapt_thresh")
 
     cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
 
-    box_list = []
+    imgs_with_boxes = []
     ref_img = cropped_img.copy()
     for i, c in enumerate(cnts):
         if heirs[i] != -1:
@@ -178,27 +178,27 @@ def segmentation_test(gray_img):
 
             # Check for overlapping boxes and combine them
             box = (x_val, y_val), (x_val + w, y_val + h)
-            inter = is_intersecting(box, box_list)
+            inter = is_intersecting(box, imgs_with_boxes)
             if inter is not None:
-                box = combine(box, box_list.pop(inter))
+                box = combine(box, imgs_with_boxes.pop(inter)[0])
+
+            box_image = thresh[box[t][y]:box[b][y], box[t][x]:box[b][x]]
+            # Resize and pad the box
+            letter_resize = segment.pad_resize(box_image)
+            # Model prefers blurry images
+            letter_blur = cv2.blur(letter_resize, (2, 2))
+            # Add the box to the list of characters
+            img_with_box = (box, letter_blur)
 
             # Insert the box into a sorted list
-            bisect.insort(box_list, box)
+            bisect.insort(imgs_with_boxes, img_with_box)
 
-    letters = []
-    for bx in box_list:
+    # for (bx, img) in imgs_with_boxes:
+    #     # cv2.rectangle(ref_img, bx[t], bx[b], (0, 0, 0), thickness=4)
+    #
+    # disp_img(ref_img, "boxes", color_map='brg')
 
-        cv2.rectangle(ref_img, bx[t], bx[b], (0, 0, 0), thickness=4)
-
-        box_image = blured[bx[t][y]:bx[b][y], bx[t][x]:bx[b][x]]
-        # Resize and pad the box
-        letter_resize = segment.pad_resize(box_image)
-        # Model prefers blurry images
-        # letter_blur = cv2.blur(letter_resize, (3, 3))
-        # Add the box to the list of characters
-        letters.append(letter_resize)
-
-    disp_img(ref_img, "boxes", color_map='brg')
+    boxes, letters = zip(*imgs_with_boxes)
 
     letters = np.stack(letters)
 
@@ -208,10 +208,28 @@ def segmentation_test(gray_img):
         return np.expand_dims(letters, axis=3)
 
 
-def disp_testing(box_list):
-    for bx in box_list:
-        plt.imshow(bx)
-        plt.show()
+def display_results(input_data):
+    x_pos = [20, 320, 620, 920, 1220]
+
+    # Display each character and its predicted value
+    for idx, data_point in enumerate(input_data):
+
+        window_name = f"{idx}"
+
+        cv2.namedWindow(window_name)
+        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
+        resize_img = cv2.resize(data_point, (280, 280))
+        cv2.imshow(window_name, resize_img)
+        cv2.waitKey(1)
+
+        if idx % 5 == 4:
+            if cv2.waitKey(0) == ord('q'):
+                exit(0)
+            cv2.destroyAllWindows()
+
+    if len(input_data) % 5 != 0:
+        cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
@@ -227,7 +245,7 @@ if __name__ == "__main__":
     for image_name in img_list:
         test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
         chars = segmentation_test(test_image)
-        disp_testing(chars)
+        display_results(chars)
         input("Press any key to continue... ")
 
     print("Done!")

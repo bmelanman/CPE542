@@ -1,3 +1,18 @@
+Model #1
+model = Sequential([
+    Input(shape=(28, 28, 1)),
+    Conv2D(32, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Conv2D(128, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.2),
+    Dense(64, activation='relu'),
+    Dense(62, activation='sigmoid')
+])
 Epoch   1/100 - 406s 9ms/step - loss: 0.6524 - accuracy: 0.7859 - val_loss: 0.4686 - val_accuracy: 0.8347 - lr: 0.0050
 Epoch   2/100 - 398s 9ms/step - loss: 0.4615 - accuracy: 0.8360 - val_loss: 0.4425 - val_accuracy: 0.8426 - lr: 0.0050
 Epoch   3/100 - 405s 9ms/step - loss: 0.4341 - accuracy: 0.8436 - val_loss: 0.4352 - val_accuracy: 0.8435 - lr: 0.0050
@@ -98,3 +113,19 @@ Epoch 97/100 - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.43
 Epoch 98/100 - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
 Epoch 99/100 - 763s 17ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
 Epoch 100/100 - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+
+Repeated with various variables changed
+model = Sequential([
+    Input(shape=(28, 28, 1)),
+    Conv2D(32, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Conv2D(128, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.2),
+    Dense(64, activation='relu'),
+    Dense(62, activation='sigmoid')
+])
