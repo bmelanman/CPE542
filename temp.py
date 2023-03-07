@@ -1,21 +1,9 @@
-import gc
 import tensorflow as tf
-from keras.callbacks import ReduceLROnPlateau, Callback
-from tensorflow_datasets import load
-import os
-
-from keras import backend as k
-from keras.models import Sequential
+from keras.callbacks import ReduceLROnPlateau
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input, Dropout
+from keras.models import Sequential
 from keras.optimizers import Adam
-
-
-os_name = os.name
-if os_name == "nt":
-    num_threads = os.cpu_count()
-    if num_threads >= 1:
-        tf.config.threading.set_inter_op_parallelism_threads(num_threads)
-        tf.config.threading.set_intra_op_parallelism_threads(num_threads)
+from tensorflow_datasets import load
 
 
 def normalize_img(image, label):
@@ -23,26 +11,20 @@ def normalize_img(image, label):
     return tf.cast(image, tf.float32) / 255., label
 
 
-class ClearMemory(Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        gc.collect()
-        k.clear_session()
-
-
 def generate_ocr_model(filepath, epochs):
     # Creating the CNN model
     model = Sequential([
         Input(shape=(28, 28, 1)),
-        Conv2D(32, (3, 3), activation='leaky_relu'),
+        Conv2D(32, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
-        Conv2D(64, (3, 3), activation='leaky_relu'),
+        Conv2D(64, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
-        Conv2D(128, (3, 3), activation='leaky_relu'),
+        Conv2D(128, (3, 3), activation='relu'),
         MaxPool2D((2, 2)),
         Flatten(),
-        Dense(128, activation='leaky_relu'),
+        Dense(128, activation='relu'),
         Dropout(0.2),
-        Dense(64, activation='leaky_relu'),
+        Dense(64, activation='relu'),
         Dense(62, activation='sigmoid')
     ])
 
@@ -50,7 +32,7 @@ def generate_ocr_model(filepath, epochs):
     model.compile(
         optimizer=Adam(
             learning_rate=0.005,
-            epsilon=0.1
+            epsilon=0.5
         ),
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
@@ -88,19 +70,17 @@ def generate_ocr_model(filepath, epochs):
     input("Model ready to begin training! Press any key to begin...\n")
 
     reduce_lr = ReduceLROnPlateau(
-        monitor='val_accuracy',
+        monitor='loss',
         factor=0.5,
         patience=3,
-        min_lr=0.000001
+        min_lr=1e-9
     )
-
-    mem_clean = ClearMemory()
 
     model.fit(
         train_ds,
         epochs=epochs,
         validation_data=test_ds,
-        callbacks=[mem_clean, reduce_lr]
+        callbacks=[reduce_lr]
     )
 
     model.save(

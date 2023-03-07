@@ -84,61 +84,17 @@ Epoch  83/100 - 392s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.43
 Epoch  84/100 - 388s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
 Epoch  85/100 - 430s 10ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
 Epoch  86/100 - 444s 10ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
-Epoch 87/100
-2023-03-06 16:17:39.749347: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:26:50.556236: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 585s 13ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
-Epoch 88/100
-2023-03-06 16:27:24.833240: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:35:43.665675: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 534s 12ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 89/100
-2023-03-06 16:36:18.795845: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:46:19.907611: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 634s 15ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 90/100
-2023-03-06 16:46:52.622072: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:53:35.722047: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 437s 10ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 91/100
-2023-03-06 16:54:10.093732: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:01:25.951421: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 471s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 92/100
-2023-03-06 17:02:01.483801: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:09:26.255521: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 480s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 93/100
-2023-03-06 17:10:01.479308: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43620/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:17:33.798292: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 488s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 94/100
-2023-03-06 17:18:09.882514: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:25:38.066837: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 95/100
-2023-03-06 17:26:14.159270: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:33:36.808189: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 96/100
-2023-03-06 17:34:12.938866: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43619/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:41:36.286202: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 97/100
-2023-03-06 17:42:11.777151: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:49:36.572476: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 98/100
-2023-03-06 17:50:12.396701: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:57:37.254591: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 99/100
-2023-03-06 17:58:12.980884: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 18:10:19.883587: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 763s 17ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-Epoch 100/100
-2023-03-06 18:10:55.510105: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 18:18:24.066488: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
-43621/43621 [==============================] - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
-WARNING:absl:Found untraced functions such as _jit_compiled_convolution_op, _jit_compiled_convolution_op, _jit_compiled_convolution_op while saving (showing 3 of 3). These functions will not be directly callable after loading.
-[bryce CPE542] %
+Epoch 87/100 - 585s 13ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch 88/100 - 534s 12ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 89/100 - 634s 15ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 90/100 - 437s 10ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 91/100 - 471s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 92/100 - 480s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 93/100 - 488s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 94/100 - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 95/100 - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 96/100 - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 97/100 - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 98/100 - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 99/100 - 763s 17ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 100/100 - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
