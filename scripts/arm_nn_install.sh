@@ -5,6 +5,11 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
+INSTALL_FLAG=1
+if ! [ "$1" == "-i" ]; then
+  INSTALL_FLAG=0
+fi
+
 cleanup() {
   local rv=$?
 
@@ -27,7 +32,7 @@ spinner() {
   while :; do
     for _ in $(seq 0 1 $max_cycles); do
       for i in $(seq 0 1 ${#spin}); do
-        printf "\r%s" "${spin:i:1}"
+        printf "\b %s" "${spin:i:1}"
         sleep 1
       done
     done
@@ -37,7 +42,7 @@ spinner() {
 }
 
 disp_msg() {
-  printf "\r%s\n" "$@" >&5
+  printf "\r\n%s\n" "$@" >&5
   return 0
 }
 
@@ -71,15 +76,23 @@ make_basedir() {
 }
 
 download_lib() {
+
+  # Check if the user disabled installations
+  if [ "$INSTALL_FLAG" -ne 0 ]; then
+    return 0
+  fi
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
+
+  # TODO: Git interation needs improvement
   if [ ! -d "$DIR" ]; then
     git clone "$2" "$3" "$DIR" || echo_stderr "git error when downloading $1"
-    git -C "$DIR" submodule update --init
+    git -C "$DIR" submodule update --init || true
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || true
     (git submodule update --recursive --remote --init) || true
   fi
+
   cd "$DIR" || return 1
   echo "Done!"
 
@@ -89,7 +102,7 @@ download_lib() {
 run_prog() {
 
   # begin the installation process
-  disp_msg "\nInstallation will now begin!"
+  disp_msg "Installation will now begin!"
 
   # redirect stdout/stderr to log files
   exec >>"$LOG" 2>>"$ERR"
