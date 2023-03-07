@@ -79,7 +79,7 @@ download_lib() {
     return 0
   fi
 
-  if [ "$3" == "--" ]; then
+  if [ "$#" -ne 4 ]; then
     3="--"
   fi
   echo "Downloading $1..."
