@@ -168,7 +168,7 @@ run_prog() {
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
 
-  download_lib "armnn" "https://github.com/Arm-software/armnn"
+  download_lib "armnn" "https://github.com/Arm-software/armnn" ""
 
   download_lib "tensorflow" "https://github.com/tensorflow/tensorflow.git"
   git checkout 590d6eef7e91a6a7392c8ffffb7b58f2e0c8bc6b
