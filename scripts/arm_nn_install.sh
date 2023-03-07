@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root!"
@@ -111,7 +111,7 @@ run_prog() {
   # Cmake parallel processing flag
   NUM_CORES="$(($(nproc) - 1))"
   export MAKEFLAGS="--parallel $NUM_CORES"
-  echo "Number of utilized cores: $NUM_CORES" >"$LOG" 2>"$ERR"
+  echo "Number of utilized cores: $NUM_CORES"
 
   # Increase virtual memory swapfile allocation from 100 to 1024
   SWAP_SIZE="CONF_SWAPSIZE=100"
