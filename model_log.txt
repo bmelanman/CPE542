@@ -1,0 +1,144 @@
+Epoch   1/100 - 406s 9ms/step - loss: 0.6524 - accuracy: 0.7859 - val_loss: 0.4686 - val_accuracy: 0.8347 - lr: 0.0050
+Epoch   2/100 - 398s 9ms/step - loss: 0.4615 - accuracy: 0.8360 - val_loss: 0.4425 - val_accuracy: 0.8426 - lr: 0.0050
+Epoch   3/100 - 405s 9ms/step - loss: 0.4341 - accuracy: 0.8436 - val_loss: 0.4352 - val_accuracy: 0.8435 - lr: 0.0050
+Epoch   4/100 - 404s 9ms/step - loss: 0.4184 - accuracy: 0.8480 - val_loss: 0.4308 - val_accuracy: 0.8449 - lr: 0.0050
+Epoch   5/100 - 404s 9ms/step - loss: 0.4082 - accuracy: 0.8509 - val_loss: 0.4304 - val_accuracy: 0.8454 - lr: 0.0050
+Epoch   6/100 - 380s 9ms/step - loss: 0.4000 - accuracy: 0.8530 - val_loss: 0.4257 - val_accuracy: 0.8467 - lr: 0.0050
+Epoch   7/100 - 375s 9ms/step - loss: 0.3942 - accuracy: 0.8545 - val_loss: 0.4292 - val_accuracy: 0.8459 - lr: 0.0050
+Epoch   8/100 - 376s 9ms/step - loss: 0.3892 - accuracy: 0.8562 - val_loss: 0.4266 - val_accuracy: 0.8465 - lr: 0.0050
+Epoch   9/100 - 375s 9ms/step - loss: 0.3851 - accuracy: 0.8568 - val_loss: 0.4318 - val_accuracy: 0.8457 - lr: 0.0050
+Epoch  10/100 - 377s 9ms/step - loss: 0.3556 - accuracy: 0.8662 - val_loss: 0.4150 - val_accuracy: 0.8509 - lr: 0.0025
+Epoch  11/100 - 377s 9ms/step - loss: 0.3479 - accuracy: 0.8683 - val_loss: 0.4190 - val_accuracy: 0.8513 - lr: 0.0025
+Epoch  12/100 - 406s 9ms/step - loss: 0.3436 - accuracy: 0.8695 - val_loss: 0.4239 - val_accuracy: 0.8501 - lr: 0.0025
+Epoch  13/100 - 456s 10ms/step - loss: 0.3404 - accuracy: 0.8706 - val_loss: 0.4256 - val_accuracy: 0.8499 - lr: 0.0025
+Epoch  14/100 - 437s 10ms/step - loss: 0.3376 - accuracy: 0.8716 - val_loss: 0.4289 - val_accuracy: 0.8493 - lr: 0.0025
+Epoch  15/100 - 20643s 473ms/step - loss: 0.3238 - accuracy: 0.8760 - val_loss: 0.4236 - val_accuracy: 0.8520 - lr: 0.0012
+Epoch  16/100 - 9663s 222ms/step - loss: 0.3190 - accuracy: 0.8779 - val_loss: 0.4263 - val_accuracy: 0.8517 - lr: 0.0012
+Epoch  17/100 - 391s 9ms/step - loss: 0.3160 - accuracy: 0.8789 - val_loss: 0.4295 - val_accuracy: 0.8517 - lr: 0.0012
+Epoch  18/100 - 434s 10ms/step - loss: 0.3136 - accuracy: 0.8796 - val_loss: 0.4326 - val_accuracy: 0.8514 - lr: 0.0012
+Epoch  19/100 - 439s 10ms/step - loss: 0.3077 - accuracy: 0.8814 - val_loss: 0.4278 - val_accuracy: 0.8530 - lr: 6.2500e-04
+Epoch  20/100 - 408s 9ms/step - loss: 0.3047 - accuracy: 0.8823 - val_loss: 0.4305 - val_accuracy: 0.8527 - lr: 6.2500e-04
+Epoch  21/100 - 399s 9ms/step - loss: 0.3027 - accuracy: 0.8831 - val_loss: 0.4330 - val_accuracy: 0.8527 - lr: 6.2500e-04
+Epoch  22/100 - 414s 9ms/step - loss: 0.3011 - accuracy: 0.8836 - val_loss: 0.4353 - val_accuracy: 0.8524 - lr: 6.2500e-04
+Epoch  23/100 - 406s 9ms/step - loss: 0.2986 - accuracy: 0.8843 - val_loss: 0.4313 - val_accuracy: 0.8532 - lr: 3.1250e-04
+Epoch  24/100 - 402s 9ms/step - loss: 0.2967 - accuracy: 0.8849 - val_loss: 0.4323 - val_accuracy: 0.8532 - lr: 3.1250e-04
+Epoch  25/100 - 377s 9ms/step - loss: 0.2955 - accuracy: 0.8853 - val_loss: 0.4336 - val_accuracy: 0.8531 - lr: 3.1250e-04
+Epoch  26/100 - 378s 9ms/step - loss: 0.2944 - accuracy: 0.8858 - val_loss: 0.4347 - val_accuracy: 0.8531 - lr: 3.1250e-04
+Epoch  27/100 - 377s 9ms/step - loss: 0.2935 - accuracy: 0.8861 - val_loss: 0.4314 - val_accuracy: 0.8539 - lr: 1.5625e-04
+Epoch  28/100 - 379s 9ms/step - loss: 0.2924 - accuracy: 0.8865 - val_loss: 0.4319 - val_accuracy: 0.8541 - lr: 1.5625e-04
+Epoch  29/100 - 377s 9ms/step - loss: 0.2916 - accuracy: 0.8868 - val_loss: 0.4325 - val_accuracy: 0.8542 - lr: 1.5625e-04
+Epoch  30/100 - 378s 9ms/step - loss: 0.2910 - accuracy: 0.8870 - val_loss: 0.4333 - val_accuracy: 0.8542 - lr: 1.5625e-04
+Epoch  31/100 - 382s 9ms/step - loss: 0.2904 - accuracy: 0.8872 - val_loss: 0.4339 - val_accuracy: 0.8539 - lr: 1.5625e-04
+Epoch  32/100 - 380s 9ms/step - loss: 0.2901 - accuracy: 0.8872 - val_loss: 0.4327 - val_accuracy: 0.8542 - lr: 7.8125e-05
+Epoch  33/100 - 377s 9ms/step - loss: 0.2894 - accuracy: 0.8875 - val_loss: 0.4329 - val_accuracy: 0.8542 - lr: 7.8125e-05
+Epoch  34/100 - 378s 9ms/step - loss: 0.2890 - accuracy: 0.8876 - val_loss: 0.4332 - val_accuracy: 0.8541 - lr: 7.8125e-05
+Epoch  35/100 - 379s 9ms/step - loss: 0.2889 - accuracy: 0.8876 - val_loss: 0.4324 - val_accuracy: 0.8545 - lr: 3.9062e-05
+Epoch  36/100 - 378s 9ms/step - loss: 0.2885 - accuracy: 0.8878 - val_loss: 0.4326 - val_accuracy: 0.8545 - lr: 3.9062e-05
+Epoch  37/100 - 378s 9ms/step - loss: 0.2882 - accuracy: 0.8879 - val_loss: 0.4327 - val_accuracy: 0.8545 - lr: 3.9062e-05
+Epoch  38/100 - 381s 9ms/step - loss: 0.2880 - accuracy: 0.8880 - val_loss: 0.4329 - val_accuracy: 0.8545 - lr: 3.9062e-05
+Epoch  39/100 - 385s 9ms/step - loss: 0.2879 - accuracy: 0.8879 - val_loss: 0.4324 - val_accuracy: 0.8546 - lr: 1.9531e-05
+Epoch  40/100 - 380s 9ms/step - loss: 0.2877 - accuracy: 0.8881 - val_loss: 0.4324 - val_accuracy: 0.8546 - lr: 1.9531e-05
+Epoch  41/100 - 378s 9ms/step - loss: 0.2875 - accuracy: 0.8881 - val_loss: 0.4325 - val_accuracy: 0.8546 - lr: 1.9531e-05
+Epoch  42/100 - 378s 9ms/step - loss: 0.2874 - accuracy: 0.8882 - val_loss: 0.4326 - val_accuracy: 0.8546 - lr: 1.9531e-05
+Epoch  43/100 - 379s 9ms/step - loss: 0.2873 - accuracy: 0.8882 - val_loss: 0.4324 - val_accuracy: 0.8547 - lr: 9.7656e-06
+Epoch  44/100 - 382s 9ms/step - loss: 0.2872 - accuracy: 0.8883 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 9.7656e-06
+Epoch  45/100 - 412s 9ms/step - loss: 0.2872 - accuracy: 0.8883 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 9.7656e-06
+Epoch  46/100 - 451s 10ms/step - loss: 0.2871 - accuracy: 0.8884 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 9.7656e-06
+Epoch  47/100 - 442s 10ms/step - loss: 0.2870 - accuracy: 0.8884 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 4.8828e-06
+Epoch  48/100 - 442s 10ms/step - loss: 0.2869 - accuracy: 0.8884 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 4.8828e-06
+Epoch  49/100 - 447s 10ms/step - loss: 0.2869 - accuracy: 0.8884 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 4.8828e-06
+Epoch  50/100 - 446s 10ms/step - loss: 0.2869 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8549 - lr: 4.8828e-06
+Epoch  51/100 - 446s 10ms/step - loss: 0.2868 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 2.4414e-06
+Epoch  52/100 - 446s 10ms/step - loss: 0.2868 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8547 - lr: 2.4414e-06
+Epoch  53/100 - 439s 10ms/step - loss: 0.2868 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 2.4414e-06
+Epoch  54/100 - 429s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.2207e-06
+Epoch  55/100 - 439s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8547 - lr: 1.2207e-06
+Epoch  56/100 - 441s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.2207e-06
+Epoch  57/100 - 444s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  58/100 - 432s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  59/100 - 437s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  60/100 - 426s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  61/100 - 425s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  62/100 - 431s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  63/100 - 432s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  64/100 - 446s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  65/100 - 442s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  66/100 - 448s 10ms/step - loss: 0.2867 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  67/100 - 431s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  68/100 - 431s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  69/100 - 432s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  70/100 - 432s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4324 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  71/100 - 439s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  72/100 - 429s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  73/100 - 445s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  74/100 - 442s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  75/100 - 434s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  76/100 - 434s 10ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  77/100 - 395s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  78/100 - 406s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  79/100 - 396s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  80/100 - 399s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  81/100 - 402s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch  82/100 - 396s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  83/100 - 392s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  84/100 - 388s 9ms/step - loss: 0.2866 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  85/100 - 430s 10ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch  86/100 - 444s 10ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch 87/100
+2023-03-06 16:17:39.749347: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:26:50.556236: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 585s 13ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8548 - lr: 1.0000e-06
+Epoch 88/100
+2023-03-06 16:27:24.833240: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:35:43.665675: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 534s 12ms/step - loss: 0.2865 - accuracy: 0.8885 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 89/100
+2023-03-06 16:36:18.795845: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:46:19.907611: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 634s 15ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 90/100
+2023-03-06 16:46:52.622072: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88852023-03-06 16:53:35.722047: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 437s 10ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4325 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 91/100
+2023-03-06 16:54:10.093732: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:01:25.951421: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 471s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 92/100
+2023-03-06 17:02:01.483801: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:09:26.255521: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 480s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 93/100
+2023-03-06 17:10:01.479308: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43620/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:17:33.798292: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 488s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 94/100
+2023-03-06 17:18:09.882514: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:25:38.066837: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 95/100
+2023-03-06 17:26:14.159270: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:33:36.808189: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 96/100
+2023-03-06 17:34:12.938866: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43619/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:41:36.286202: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 479s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 97/100
+2023-03-06 17:42:11.777151: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:49:36.572476: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 98/100
+2023-03-06 17:50:12.396701: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43616/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 17:57:37.254591: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 481s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 99/100
+2023-03-06 17:58:12.980884: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 18:10:19.883587: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 763s 17ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+Epoch 100/100
+2023-03-06 18:10:55.510105: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43617/43621 [============================>.] - ETA: 0s - loss: 0.2865 - accuracy: 0.88862023-03-06 18:18:24.066488: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.
+43621/43621 [==============================] - 484s 11ms/step - loss: 0.2865 - accuracy: 0.8886 - val_loss: 0.4326 - val_accuracy: 0.8547 - lr: 1.0000e-06
+WARNING:absl:Found untraced functions such as _jit_compiled_convolution_op, _jit_compiled_convolution_op, _jit_compiled_convolution_op while saving (showing 3 of 3). These functions will not be directly callable after loading.
+[bryce CPE542] %

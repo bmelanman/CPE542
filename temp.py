@@ -10,7 +10,8 @@ from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Input, Dropout
 from keras.optimizers import Adam
 
 
-if os.name == "nt":
+os_name = os.name
+if os_name == "nt":
     num_threads = os.cpu_count()
     if num_threads >= 1:
         tf.config.threading.set_inter_op_parallelism_threads(num_threads)

@@ -6,29 +6,45 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 cleanup() {
-  rv=$?
-  exec 1>&5
+  local rv=$?
+
+  kill -9 "$PID"
+  printf "\r"
+
   if [ $rv -ne 0 ]; then
-    printf "\rAn error has occurred! Error log:\n"
-    cat "$ERR"
+    printf "Error! Please see error logs:\n"
   else
-    printf "Done!\n"
+    printf "Installation complete! Goodbye :)\n"
   fi
+
   exit $rv
 }
 
 spinner() {
-  pid=$! # Process Id of the previous running command
-  spin='-\|/'
-  i=0
-  while kill -0 $pid 2>/dev/null; do
-    i=$(((i + 1) % 4))
-    printf "\r%s" "${spin:$i:1}"
-    sleep 1
+  local max_cycles=10
+  local spin='┤┘┴└├┌┬┐'
+
+  while :; do
+    for _ in $(seq 0 1 $max_cycles); do
+      for i in $(seq 0 1 ${#spin}); do
+        printf "\r  %s\r" "${spin:$i:1}"
+        sleep 0.5
+      done
+    done
+    printf "\r"
   done
-  printf "\b"
 
   return 0
+}
+
+disp_msg() {
+  printf "\r%s\n" "$@" >&5
+  return 0
+}
+
+echo_stderr() {
+  printf "\nERR: %s\n" "$@" >&6
+  return 1
 }
 
 make_basedir() {
@@ -54,29 +70,25 @@ make_basedir() {
   return 0
 }
 
-disp_msg() {
-  printf "\r%s\n" "$@" >&5
-  return 0
-}
-
 download_lib() {
-  echo "Downloading @1..."
-  if [ ! -d "$BASEDIR/@1" ]; then
-    git clone @2 "$BASEDIR"/@1 || return 1
+  echo "Downloading $1..."
+  local DIR="$BASEDIR/$1"
+  if [ ! -d "$DIR" ]; then
+    git clone "$2" "$3" "$DIR" || echo_stderr "git error when downloading $1"
+    git -C "$DIR" submodule update --init
   else
-    (git -C "$BASEDIR"/@1 fetch && git -C "$BASEDIR"/@1 merge) || return 1
+    (git -C "$DIR" fetch && git -C "$DIR" merge) || echo_stderr "git error when fetching and merging $1"
+    (git submodule update --recursive --remote) || echo_stderr "git error when updating submodules for $1"
   fi
-  cd "$BASEDIR"/@1 || return 1
+  cd "$DIR" || return 1
+  echo "Done!"
 
   return 0
 }
 
 run_prog() {
   # redirect stdout/stderr to log files
-  exec 5>&1 >>"$LOG" 2>>"$ERR"
-
-  # Set cleanup on exit
-  trap 'cleanup' EXIT
+  exec >>"$LOG" 2>>"$ERR"
 
   # Cmake parallel processing flag
   NUM_CORES="$(($(nproc) - 1))"
@@ -104,6 +116,7 @@ run_prog() {
   # Install ComputeLib
   disp_msg "Installing ComputeLibrary..."
   download_lib "ComputeLibrary" "https://github.com/Arm-software/ComputeLibrary.git"
+  echo "Installing ComputeLib"
   scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
     -j$NUM_CORES
   echo "Done!"
@@ -122,11 +135,8 @@ run_prog() {
 
   # Install Boost
   disp_msg "Installing Boost..."
-  echo "Downloading Boost..."
-  LOCATION=$(curl -s https://api.github.com/repos/boostorg/boost/releases/latest | grep "zipball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
-  curl -L -o "$BASEDIR"/boost_latest.tar.gz "$LOCATION"
-  unzip -o "$BASEDIR"/boost_latest.tar.gz -d "$BASEDIR"/boost_latest
-  cd "$BASEDIR"/boost_latest || exit 1
+  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
+
   echo "Installing Boost..."
   ./bootstrap.sh
   ./b2 cxxflags=-fPIC link=static \
@@ -136,6 +146,7 @@ run_prog() {
     --with-filesystem \
     --with-test \
     --with-log
+
   echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
@@ -275,9 +286,16 @@ run_prog() {
   return 0
 }
 
+# Init stuff
+trap 'cleanup' EXIT
+exec 5>&1; exec 6>&2;
+
+# Start the spinner!
+spinner &
+PID=$!
+
 # Set up root directory
 make_basedir
 
 # run the installer along with a simple spinner
-run_prog &
-spinner
+run_prog
