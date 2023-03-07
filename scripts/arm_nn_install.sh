@@ -80,9 +80,7 @@ download_lib() {
   fi
 
   local flags="--"
-  if [ "$#" -lt 3 ]; then
-    ((flags="--"))
-  else
+  if [ "$#" -eq 3 ]; then
     ((flags=$3))
   fi
   echo "Downloading $1..."
