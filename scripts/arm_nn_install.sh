@@ -32,10 +32,11 @@ spinner() {
   while :; do
     for _ in $(seq 0 1 $max_cycles); do
       for i in $(seq 0 1 ${#spin}); do
-        printf "\b %s" "${spin:i:1}"
+        printf "%s" "${spin:i:1}"
         sleep 1
       done
     done
+    printf "\r"
   done
 
   return 0
@@ -48,8 +49,7 @@ disp_msg() {
 
 echo_stderr() {
   printf "\nERR: %s\n" "$@" >&6
-  false
-  cleanup
+  exit 1
 }
 
 make_basedir() {
