@@ -71,8 +71,8 @@ def generate_ocr_model(filepath, epochs):
 
     reduce_lr = ReduceLROnPlateau(
         monitor='loss',
-        factor=0.5,
-        patience=3,
+        factor=0.8,
+        patience=2,
         min_lr=1e-9
     )
 

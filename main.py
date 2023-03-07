@@ -84,7 +84,7 @@ def display_results(input_data, prediction_data, pred_min: float):
         window_name = f"{result_arr[np.argmax(pred)]} - {np.max(pred) * 100:0.2f}% - {idx}, "
 
         cv2.namedWindow(window_name)
-        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
+        cv2.moveWindow(window_name, x_pos[idx % 5], 450)
         resize_img = cv2.resize(data_point[0], (280, 280))
         cv2.imshow(window_name, resize_img)
         cv2.waitKey(1)
@@ -203,10 +203,10 @@ if __name__ == "__main__":
         "card.jpeg",
         "book.png",
     ]
-    i = -1
+    i = 1
 
     # Minimum prediction confidence
-    min_conf = 0.51
+    min_conf = 0.40
 
     # Camera input flag
     camera_flag = False

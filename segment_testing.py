@@ -1,7 +1,8 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import bisect
+from functools import cmp_to_key
+import tensorflow as tf
 
 import segment
 
@@ -116,11 +117,12 @@ def fit(gray_img):
 
 
 def is_intersecting(box0, box_list):
+    overlap_tolerance = 0.95
     for idx, (box1, img) in enumerate(box_list):
-        if not (box1[t][x] > box0[b][x]) \
-                and not (box0[t][x] > box1[b][x]) \
-                and not (box1[t][y] > box0[b][y]) \
-                and not (box0[t][y] > box1[b][y]):
+        if not (box1[t][x] >= (box0[b][x] * overlap_tolerance)) \
+                and not (box0[t][x] >= (box1[b][x] * overlap_tolerance)) \
+                and not (box1[t][y] >= (box0[b][y] * overlap_tolerance)) \
+                and not (box0[t][y] >= (box1[b][y] * overlap_tolerance)):
             return idx
     return None
 
@@ -132,6 +134,21 @@ def combine(box0, box1):
     return (np.min(x_vals), np.min(y_vals)), (np.max(x_vals), np.max(y_vals))
 
 
+def coords_sort(img_bx1, img_bx2):
+
+    box1 = img_bx1[0]
+    box2 = img_bx2[0]
+
+    if box1[t][x] <= box2[t][x]:
+        if box1[t][y] >= box2[b][y]:
+            return -1
+        return 1
+    elif box1[b][y] <= box2[t][y]:
+        return 1
+
+    return -1
+
+
 def segmentation_test(gray_img):
     # Check if the image has a black or white background
     if np.mean(gray_img) < 50:
@@ -139,29 +156,29 @@ def segmentation_test(gray_img):
 
     cropped_img = fit(gray_img)
 
-    thresh = cv2.threshold(cropped_img, 190, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    thresh0 = cv2.threshold(cropped_img, 127, 255, cv2.THRESH_BINARY)[1]
 
-    blured = cv2.blur(cropped_img, (3, 3))
+    thresh1 = cv2.adaptiveThreshold(cropped_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
-    kernel = np.ones((3, 3), np.uint8)
-    morph1 = cv2.morphologyEx(blured, cv2.MORPH_DILATE, kernel)
+    rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 5))
+    morph1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, rect_kernel)
 
-    kernel = np.ones((5, 5), np.uint8)
-    morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
+    thresh2 = cv2.threshold(morph1, 190, 255, cv2.THRESH_BINARY_INV)[1]
 
-    adapt_thresh = cv2.adaptiveThreshold(morph2, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+    kernel = np.ones((1, 2), np.uint8)
+    morph2 = cv2.morphologyEx(thresh2, cv2.MORPH_DILATE, kernel)
 
     disp_img(cropped_img, "cropped_img")
-    disp_img(blured, "blured")
-    # disp_img(thresh, "thresh")
-    disp_img(morph1, "morph1")
-    disp_img(morph2, "morph2")
-    disp_img(adapt_thresh, "adapt_thresh")
+    disp_img(thresh0, "thresh0")
+    disp_img(thresh1, "thresh1")
+    disp_img(morph1, "mask")
+    disp_img(thresh2, "thresh2")
+    disp_img(morph2, "morph1")
 
-    cnts, heirs = cv2.findContours(adapt_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnts, heirs = cv2.findContours(morph2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
 
-    imgs_with_boxes = []
+    box_img_list = []
     ref_img = cropped_img.copy()
     for i, c in enumerate(cnts):
         if heirs[i] != -1:
@@ -172,18 +189,17 @@ def segmentation_test(gray_img):
                 continue
 
             # Skip blank boxes
-            crop = ref_img[y_val:y_val + h, x_val:x_val + w]
+            crop = thresh0[y_val:y_val + h, x_val:x_val + w]
             if np.min(crop) == 255 or np.max(crop) == 0:
                 continue
 
             # Check for overlapping boxes and combine them
             box = (x_val, y_val), (x_val + w, y_val + h)
-            inter = is_intersecting(box, imgs_with_boxes)
+            inter = is_intersecting(box, box_img_list)
             if inter is not None:
+                box = combine(box, box_img_list.pop(inter)[0])
 
-                box = combine(box, imgs_with_boxes.pop(inter)[0])
-
-            box_image = thresh[box[t][y]:box[b][y], box[t][x]:box[b][x]]
+            box_image = thresh0[box[t][y]:box[b][y], box[t][x]:box[b][x]]
             # Resize and pad the box
             letter_resize = segment.pad_resize(box_image)
             # Model prefers blurry images
@@ -192,14 +208,27 @@ def segmentation_test(gray_img):
             img_with_box = (box, letter_blur)
 
             # Insert the box into a sorted list
-            bisect.insort(imgs_with_boxes, img_with_box)
+            box_img_list.append(img_with_box)
 
-    # for (bx, img) in imgs_with_boxes:
-    #     # cv2.rectangle(ref_img, bx[t], bx[b], (0, 0, 0), thickness=4)
-    #
-    # disp_img(ref_img, "boxes", color_map='brg')
+    for (box, char) in box_img_list:
+        cv2.rectangle(ref_img, box[t], box[b], (0, 0, 0), thickness=1)
 
-    boxes, letters = zip(*imgs_with_boxes)
+    ref_shape = ref_img.shape
+    ref_resize = tf.image.resize(
+        np.expand_dims(ref_img, axis=2),
+        (ref_shape[0] * 10, ref_shape[1] * 10),
+        preserve_aspect_ratio=True
+    )
+
+    disp_img(ref_resize, "boxes")
+
+    # Sort the boxes from top left to bottom right
+    box_img_list.sort(key=cmp_to_key(coords_sort), reverse=True)
+
+    boxes, letters = zip(*box_img_list)
+
+    for i in range(3):
+        disp_img(letters[i], f"{i}")
 
     letters = np.stack(letters)
 
@@ -218,13 +247,14 @@ def display_results(input_data):
         window_name = f"{idx}"
 
         cv2.namedWindow(window_name)
-        cv2.moveWindow(window_name, x_pos[idx % 5], 280)
+        cv2.moveWindow(window_name, x_pos[idx % 5], 300)
         resize_img = cv2.resize(data_point, (280, 280))
         cv2.imshow(window_name, resize_img)
         cv2.waitKey(1)
 
         if idx % 5 == 4:
             if cv2.waitKey(0) == ord('q'):
+                cv2.destroyAllWindows()
                 exit(0)
             cv2.destroyAllWindows()
 
@@ -236,17 +266,17 @@ def display_results(input_data):
 if __name__ == "__main__":
 
     img_list = [
-        "performance.png",
         "this_is_a_test.png",
-        "tesseract_sample.jpg",
-        "card.jpeg",
-        "book.png",
+        # "performance.png",
+        # "tesseract_sample.jpg",
+        # "card.jpeg",
+        # "book.png",
     ]
 
     for image_name in img_list:
         test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
         chars = segmentation_test(test_image)
-        display_results(chars)
-        input("Press any key to continue... ")
+        # display_results(chars)
+        # input("Press any key to continue... ")
 
     print("Done!")
