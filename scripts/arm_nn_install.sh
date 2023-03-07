@@ -79,7 +79,7 @@ download_lib() {
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || true
     (git submodule update --recursive --remote --init) || true
-  fiπ
+  fi
   cd "$DIR" || return 1
   echo "Done!"
 
