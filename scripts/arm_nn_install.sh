@@ -22,29 +22,15 @@ cleanup() {
 
 spinner() {
   local max_cycles=10
-  local spin=(
-    "   >))'>             "
-    "     >))'>           "
-    "       >))'>         "
-    "         >))'>       "
-    "           >))'>     "
-    "             >))'>   "
-    "             <'((<   "
-    "           <'((<     "
-    "         <'((<       "
-    "       <'((<         "
-    "     <'((<           "
-    "   <'((<             "
-  )
+  local spin="-\|/"
 
   while :; do
     for _ in $(seq 0 1 $max_cycles); do
       for i in $(seq 0 1 ${#spin}); do
-        echo -e "\r%s\r" "${spin:(($i * 22)):21}"
+        printf "\r%s" "${spin:i:1}"
         sleep 1
       done
     done
-    printf "\r"
   done
 
   return 0
@@ -91,9 +77,9 @@ download_lib() {
     git clone "$2" "$3" "$DIR" || echo_stderr "git error when downloading $1"
     git -C "$DIR" submodule update --init
   else
-    (git -C "$DIR" fetch && git -C "$DIR" merge) || echo_stderr "git error when fetching and merging $1"
+    (git -C "$DIR" fetch && git -C "$DIR" merge) || true
     (git submodule update --recursive --remote --init) || true
-  fi
+  fiπ
   cd "$DIR" || return 1
   echo "Done!"
 
