@@ -92,7 +92,7 @@ download_lib() {
     git -C "$DIR" submodule update --init
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || echo_stderr "git error when fetching and merging $1"
-    git submodule update --recursive --remote
+    (git submodule update --recursive --remote) || true
   fi
   cd "$DIR" || return 1
   echo "Done!"
