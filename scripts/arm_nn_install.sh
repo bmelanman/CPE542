@@ -57,7 +57,7 @@ disp_msg() {
 
 echo_stderr() {
   printf "\nERR: %s\n" "$@" >&6
-  exit 1
+  flase && cleanup
 }
 
 make_basedir() {
