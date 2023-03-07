@@ -57,7 +57,8 @@ disp_msg() {
 
 echo_stderr() {
   printf "\nERR: %s\n" "$@" >&6
-  flase && cleanup
+  false
+  cleanup
 }
 
 make_basedir() {
@@ -91,7 +92,7 @@ download_lib() {
     git -C "$DIR" submodule update --init
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || echo_stderr "git error when fetching and merging $1"
-    (git submodule update --recursive --remote) || echo_stderr "git error when updating submodules for $1"
+    git submodule update --recursive --remote
   fi
   cd "$DIR" || return 1
   echo "Done!"
