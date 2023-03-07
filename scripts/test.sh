@@ -55,18 +55,22 @@ disp_msg() {
 
 echo_stderr() {
   echo "$@" >&6
-  return 1
+  exit 1
 }
 
 download_lib() {
+  if [ "$#" -ne 4 ]; then
+    3="--"
+  fi
+
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
   if [ ! -d "$DIR" ]; then
     git clone "$2" "$3" "$DIR" || echo_stderr "git error when downloading $1"
     git -C "$DIR" submodule update --init
   else
-    (git -C "$DIR" fetch && git -C "$DIR" merge) || echo_stderr "git error when fetching and merging $1"
-    (git submodule update --recursive --remote) || echo_stderr "git error when updating submodules for $1"
+    (git -C "$DIR" fetch && git -C "$DIR" merge) || true
+    (git submodule update --recursive --remote) || true
   fi
   cd "$DIR" || return 1
   echo "Done!"
@@ -83,7 +87,7 @@ make_basedir() {
   NOW=$(date "+%d-%m-%Y_%H-%M-%S")
   LOG="$BASEDIR"/logs/out_$NOW.log
   ERR="$BASEDIR"/logs/err_$NOW.log
-  rm ./logs/*.log
+  rm ./logs/*.log || true
   date >"$LOG"
   date >"$ERR"
   chmod 777 "$LOG" "$ERR"
@@ -119,12 +123,8 @@ exec 6>&2
 spinner &
 PID=$!
 
-sleep 10
-
 # The rest of everything else
-#disp_msg "make_basedir"
-#make_basedir
-#disp_msg "testing"
-#testing
-#disp_msg "test_install"
-#test_install
+disp_msg "make_basedir"
+make_basedir
+disp_msg "downloading"
+download_lib "flatbuffers" "https://github.com/google/flatbuffers.git" "--"

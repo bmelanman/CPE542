@@ -2,25 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/accumulators" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/algorithm" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/align" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/any" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/array" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/asio" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/assert" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/assign" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/atomic" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/beast" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/bimap" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/bind" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/callable_traits" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/chrono" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/circular_buffer" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/compatibility" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/compute" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/concept_check" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/scripts/boost/libs/config" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/flatbuffers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/scripts/flatbuffers" vcs="Git" />
   </component>
 </project>

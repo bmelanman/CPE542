@@ -17,7 +17,7 @@ cleanup() {
   printf "\r"
 
   if [ $rv -ne 0 ]; then
-    printf "Error! Please see error logs:\n"
+    printf "Error! Please see error logs:\n" >&5
   else
     printf "Installation complete! Goodbye :)\n"
   fi
@@ -135,8 +135,8 @@ run_prog() {
   disp_msg "Installing ComputeLibrary..."
   download_lib "ComputeLibrary" "https://github.com/Arm-software/ComputeLibrary.git"
   echo "Installing ComputeLib"
-  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
-    -j$NUM_CORES
+#  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
+#    -j$NUM_CORES
   echo "Done!"
 
   # Install Protobuf
@@ -144,30 +144,30 @@ run_prog() {
   download_lib "protobuf" "-b v3.5.0" "https://github.com/google/protobuf.git"
 
   echo "Configuring Protobuf..."
-  ./autogen.sh
-  ./configure --prefix="$BASEDIR"/protobuf-host
+#  ./autogen.sh
+#  ./configure --prefix="$BASEDIR"/protobuf-host
 
   echo "Installing Protobuf..."
-  make -j$NUM_CORES
-  make install -j$NUM_CORES
+#  make -j$NUM_CORES
+#  make install -j$NUM_CORES
 
   echo "Done!"
 
   # Install Boost
   disp_msg "Installing Boost..."
-  download_lib "boost" "--recursive" "https://github.com/boostorg/boost.git"
-
-  echo "Installing Boost..."
-  ./bootstrap.sh
-  ./b2 cxxflags=-fPIC link=static \
-    --prefix="$BASEDIR"/boost \
-    --build-dir="$BASEDIR"/boost_latest/build toolset=gcc \
-    --with-program_options install \
-    --with-filesystem \
-    --with-test \
-    --with-log
-
-  echo "Done!"
+#  download_lib "boost" "--recursive" "https://github.com/boostorg/boost.git"
+#
+#  echo "Installing Boost..."
+#  ./bootstrap.sh
+#  ./b2 cxxflags=-fPIC link=static \
+#    --prefix="$BASEDIR"/boost \
+#    --build-dir="$BASEDIR"/boost_latest/build toolset=gcc \
+#    --with-program_options install \
+#    --with-filesystem \
+#    --with-test \
+#    --with-log
+#
+#  echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
