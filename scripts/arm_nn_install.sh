@@ -22,13 +22,26 @@ cleanup() {
 
 spinner() {
   local max_cycles=10
-  local spin='┤┘┴└├┌┬┐'
+  local spin=(
+    "   >))'>             "
+    "     >))'>           "
+    "       >))'>         "
+    "         >))'>       "
+    "           >))'>     "
+    "             >))'>   "
+    "             <'((<   "
+    "           <'((<     "
+    "         <'((<       "
+    "       <'((<         "
+    "     <'((<           "
+    "   <'((<             "
+  )
 
   while :; do
     for _ in $(seq 0 1 $max_cycles); do
       for i in $(seq 0 1 ${#spin}); do
-        printf "\r  %s\r" "${spin:$i:1}"
-        sleep 0.5
+        printf "\r%s\r" "${spin:(($i * 22)):21}"
+        sleep .5
       done
     done
     printf "\r"
