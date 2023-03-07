@@ -119,6 +119,8 @@ exec 6>&2
 spinner &
 PID=$!
 
+sleep 10
+
 # The rest of everything else
 #disp_msg "make_basedir"
 #make_basedir
@@ -126,4 +128,3 @@ PID=$!
 #testing
 #disp_msg "test_install"
 #test_install
-sleep 10

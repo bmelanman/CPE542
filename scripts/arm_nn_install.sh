@@ -40,7 +40,7 @@ spinner() {
   while :; do
     for _ in $(seq 0 1 $max_cycles); do
       for i in $(seq 0 1 ${#spin}); do
-        printf "\r%s\r" "${spin:(($i * 22)):21}"
+        echo -e "\r%s\r" "${spin:(($i * 22)):21}"
         sleep 1
       done
     done
@@ -103,7 +103,7 @@ download_lib() {
 run_prog() {
 
   # begin the installation process
-  disp_msg "Installation will now begin"
+  disp_msg "\nInstallation will now begin!"
 
   # redirect stdout/stderr to log files
   exec >>"$LOG" 2>>"$ERR"
@@ -141,7 +141,7 @@ run_prog() {
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
+  download_lib "protobuf" "-b v3.5.0" "https://github.com/google/protobuf.git"
 
   echo "Configuring Protobuf..."
   ./autogen.sh
@@ -155,7 +155,7 @@ run_prog() {
 
   # Install Boost
   disp_msg "Installing Boost..."
-  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
+  download_lib "boost" "--recursive" "https://github.com/boostorg/boost.git"
 
   echo "Installing Boost..."
   ./bootstrap.sh
