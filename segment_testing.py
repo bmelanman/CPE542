@@ -180,6 +180,7 @@ def segmentation_test(gray_img):
             box = (x_val, y_val), (x_val + w, y_val + h)
             inter = is_intersecting(box, imgs_with_boxes)
             if inter is not None:
+
                 box = combine(box, imgs_with_boxes.pop(inter)[0])
 
             box_image = thresh[box[t][y]:box[b][y], box[t][x]:box[b][x]]
