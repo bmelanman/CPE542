@@ -59,8 +59,9 @@ echo_stderr() {
 }
 
 download_lib() {
+  local flags="--"
   if [ "$#" -ne 4 ]; then
-    3="--"
+    ((3="--"))
   fi
 
   echo "Downloading $1..."

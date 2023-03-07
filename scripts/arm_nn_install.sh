@@ -79,15 +79,18 @@ download_lib() {
     return 0
   fi
 
-  if [ "$#" -ne 3 ]; then
-    ((3="--"))
+  local flags="--"
+  if [ "$#" -lt 3 ]; then
+    ((flags="--"))
+  else
+    ((flags=$3))
   fi
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
 
   # TODO: Git interation needs improvement
   if [ ! -d "$DIR" ]; then
-    git clone "$2" "$3" "$DIR" || echo_stderr "git error when downloading $1"
+    git clone "$2" "$flags" "$DIR" || echo_stderr "git error when downloading $1"
     git -C "$DIR" submodule update --init || true
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || true
