@@ -203,7 +203,7 @@ if __name__ == "__main__":
         "card.jpeg",
         "book.png",
     ]
-    i = 1
+    i = -1
 
     # Minimum prediction confidence
     min_conf = 0.40

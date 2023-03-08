@@ -142,7 +142,7 @@ run_prog() {
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-  download_lib "protobuf" "-b v3.5.0" "https://github.com/google/protobuf.git"
+  download_lib "protobuf" "https://github.com/google/protobuf.git" "-b v3.5.0"
 
   echo "Configuring Protobuf..."
   ./autogen.sh
