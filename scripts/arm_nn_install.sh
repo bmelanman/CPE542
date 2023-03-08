@@ -29,11 +29,10 @@ spinner() {
   local spin="Waiting..."
 
   while :; do
-    for i in $(seq 0 1 ${#spin}); do
-      printf "%s" "${spin:i:1}"
+    for i in $(seq 0 1 2); do
+      printf "%s" "${spin:0:((8 + i))}"
       sleep 1
     done
-    printf "\r                      \r"
   done
 
   return 0
@@ -78,17 +77,12 @@ download_lib() {
   if [ "$INSTALL_FLAG" -ne 0 ]; then
     return 0
   fi
-
-  local flags="--"
-  if [ "$#" -eq 3 ]; then
-    ((flags=$3))
-  fi
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
 
   # TODO: Git interation needs improvement
   if [ ! -d "$DIR" ]; then
-    git clone "$2" "$flags" "$DIR" || echo_stderr "git error when downloading $1"
+    git clone "$2" "$DIR" || echo_stderr "git error when downloading $1"
     git -C "$DIR" submodule update --init || true
   else
     (git -C "$DIR" fetch && git -C "$DIR" merge) || true
@@ -142,7 +136,7 @@ run_prog() {
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-  download_lib "protobuf" "https://github.com/google/protobuf.git" "-b v3.5.0"
+  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
 
   echo "Configuring Protobuf..."
   ./autogen.sh
@@ -156,7 +150,7 @@ run_prog() {
 
   # Install Boost
   disp_msg "Installing Boost..."
-  download_lib "boost" "--recursive" "https://github.com/boostorg/boost.git"
+  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
 
   echo "Installing Boost..."
   ./bootstrap.sh
@@ -309,7 +303,8 @@ run_prog() {
 
 # Init stuff
 trap 'cleanup' EXIT
-exec 5>&1; exec 6>&2;
+exec 5>&1
+exec 6>&2
 
 # Start the spinner!
 spinner &
