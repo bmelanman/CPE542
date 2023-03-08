@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root!"
@@ -30,7 +30,7 @@ spinner() {
 
   while :; do
     for i in $(seq 0 1 2); do
-      printf "%s" "${spin:0:((8 + i))}"
+      printf "\r%s" "${spin:0:((8 + i))}"
       sleep 1
     done
   done
@@ -77,6 +77,7 @@ download_lib() {
   if [ "$INSTALL_FLAG" -ne 0 ]; then
     return 0
   fi
+
   echo "Downloading $1..."
   local DIR="$BASEDIR/$1"
 
