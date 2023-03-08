@@ -52,13 +52,16 @@ make_basedir() {
   # Create a base directory
   echo "Creating a base directory..."
   mkdir -m 777 -p armnn-install
-  cd armnn-install || exit 1
+  cd armnn-install || return 1
   BASEDIR=$(pwd)
   export BASEDIR
 
   # Set up logging
   echo "Creating a new log file..."
   mkdir -m 777 -p logs
+  cd "$BASEDIR"/logs || return 1
+  mkdir -m 777 -p old_logs
+  mv ./*.log logs/old_logs
   NOW=$(date "+%d-%m-%Y_%H-%M-%S")
   LOG="$BASEDIR"/logs/out_$NOW.log
   ERR="$BASEDIR"/logs/err_$NOW.log
@@ -67,6 +70,8 @@ make_basedir() {
   chmod 777 "$LOG" "$ERR"
   echo "Done!"
   echo "Logs can be found at \"$BASEDIR/logs\""
+
+  cd "$BASEDIR" || return 1
 
   return 0
 }
@@ -110,60 +115,55 @@ run_prog() {
   echo "Number of utilized cores: $NUM_CORES"
 
   # Increase virtual memory swapfile allocation from 100 to 1024
-  SWAP_SIZE="CONF_SWAPSIZE=100"
-  if ! grep -Fxq "$SWAP_SIZE" /etc/dphys-swapfile; then
-    echo "Increasing virtual memory swapfile allocation from 100 to 1024..."
-    sed -ie 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=1024/g' /etc/dphys-swapfile
-    # Restart dphys
-    /etc/init.d/dphys-swapfile stop && /etc/init.d/dphys-swapfile start
-    echo "Done!"
-  fi
+#  SWAP_SIZE="CONF_SWAPSIZE=100"
+#  if ! grep -Fxq "$SWAP_SIZE" /etc/dphys-swapfile; then
+#    echo "Increasing virtual memory swapfile allocation from 100 to 1024..."
+#    sed -ie 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=1024/g' /etc/dphys-swapfile
+#    # Restart dphys
+#    /etc/init.d/dphys-swapfile stop && /etc/init.d/dphys-swapfile start
+#    echo "Done!"
+#  fi
 
   # Install various things
   disp_msg "Installing necessary tools..."
-  echo "Checking for updates and installing various tools and packages..."
-  apt-get update
-  apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev build-essential checkinstall libncursesw5-dev \
-    libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev
-  echo "Done!"
+#  echo "Checking for updates and installing various tools and packages..."
+#  apt-get update
+#  apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev build-essential checkinstall libncursesw5-dev \
+#    libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev
+#  echo "Done!"
 
   # Install ComputeLib
   disp_msg "Installing ComputeLibrary..."
-  download_lib "ComputeLibrary" "https://github.com/Arm-software/ComputeLibrary.git"
-  echo "Installing ComputeLib"
-  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
-    -j$NUM_CORES
-  echo "Done!"
+#  download_lib "ComputeLibrary" "https://github.com/Arm-software/ComputeLibrary.git"
+#  echo "Installing ComputeLib"
+#  scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" opencl=1 embed_kernels=1 benchmark_tests=0 validation_tests=0 \
+#    -j$NUM_CORES
+#  echo "Done!"
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
-
-  echo "Configuring Protobuf..."
-  ./autogen.sh
-  ./configure --prefix="$BASEDIR"/protobuf-host
-
-  echo "Installing Protobuf..."
-  make -j$NUM_CORES
-  make install -j$NUM_CORES
-
-  echo "Done!"
+#  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
+#  echo "Configuring Protobuf..."
+#  ./autogen.sh
+#  ./configure --prefix="$BASEDIR"/protobuf-host
+#  echo "Installing Protobuf..."
+#  make -j$NUM_CORES
+#  make install -j$NUM_CORES
+#  echo "Done!"
 
   # Install Boost
   disp_msg "Installing Boost..."
-  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
-
-  echo "Installing Boost..."
-  ./bootstrap.sh
-  ./b2 cxxflags=-fPIC link=static \
-    --prefix="$BASEDIR"/boost \
-    --build-dir="$BASEDIR"/boost_latest/build toolset=gcc \
-    --with-program_options install \
-    --with-filesystem \
-    --with-test \
-    --with-log
-
-  echo "Done!"
+#  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
+#  echo "Installing Boost..."
+#  ./bootstrap.sh
+#  ./b2 cxxflags=-fPIC link=static toolset=gcc \
+#    --prefix="$BASEDIR"/boost \
+#    --build-dir="$BASEDIR"/boost/build \
+#    --with-program_options install \
+#    --with-filesystem \
+#    --with-test \
+#    --with-log
+#  echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
   disp_msg "Installing TensorFlow..."
