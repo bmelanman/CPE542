@@ -279,4 +279,4 @@ if __name__ == "__main__":
         # display_results(chars)
         # input("Press any key to continue... ")
 
-    print("Done!")
+    print("Done! ")

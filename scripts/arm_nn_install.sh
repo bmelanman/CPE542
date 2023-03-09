@@ -222,35 +222,36 @@ run_prog() {
 #  # shellcheck disable=SC2174
 #  mkdir -m 777 -p "$BASEDIR"/armnn/build
 #  cd "$BASEDIR"/armnn/build || exit 1
-  echo "Making base libraries..."
-  cmake .. \
-    -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
-    -DARMCOMPUTE_BUILD_DIR="$BASEDIR"/ComputeLibrary/build \
-    -DTF_LITE_GENERATED_PATH="$BASEDIR"/tensorflow/tensorflow/lite/schema \
-    -DFLATBUFFERS_ROOT="$BASEDIR"/flatbuffers \
-    -DFLATC_DIR="$BASEDIR"/flatbuffers/build \
-    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
-    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/build/libflatbuffers.a \
-    -DDYNAMIC_BACKEND_PATHS="$BASEDIR"/armnn/src/dynamic/sample \
-    -DSAMPLE_DYNAMIC_BACKEND=1 \
-    -DBUILD_TF_LITE_PARSER=1 \
-    -DBUILD_TF_PARSER=1 \
-    -DARMCOMPUTENEON=1 \
-    -DBUILD_TESTS=1 \
-    -DARMNNREF=1
-  make -j$NUM_CORES
+#  echo "Making base libraries..."
+#  cmake .. \
+#    -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
+#    -DARMCOMPUTE_BUILD_DIR="$BASEDIR"/ComputeLibrary/build \
+#    -DTF_LITE_GENERATED_PATH="$BASEDIR"/tensorflow/tensorflow/lite/schema \
+#    -DFLATBUFFERS_ROOT="$BASEDIR"/flatbuffers \
+#    -DFLATC_DIR="$BASEDIR"/flatbuffers/build \
+#    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
+#    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/build/libflatbuffers.a \
+#    -DDYNAMIC_BACKEND_PATHS="$BASEDIR"/armnn/src/dynamic/sample \
+#    -DSAMPLE_DYNAMIC_BACKEND=1 \
+#    -DBUILD_TF_LITE_PARSER=1 \
+#    -DBUILD_TF_PARSER=1 \
+#    -DARMCOMPUTENEON=1 \
+#    -DBUILD_TESTS=1 \
+#    -DARMNNREF=1
+#  make -j$NUM_CORES
+#
+#  cp "$BASEDIR"/armnn/build/*.so "$BASEDIR"/armnn/
+#
+#  # shellcheck disable=SC2174
+#  mkdir -m 777 -p "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build
+#  cd "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build || exit 1
+#  echo "Making Boost libraries..."
+#  cmake .. -DBOOST_ROOT="$BASEDIR"/boost \
+#    -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a \
+#    -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a \
+#    -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
 
-  cp "$BASEDIR"/armnn/build/*.so "$BASEDIR"/armnn/
-
-  # shellcheck disable=SC2174
-  mkdir -m 777 -p "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build
-  cd "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build || exit 1
-
-  echo "Making Boost libraries..."
-  cmake .. -DBOOST_ROOT="$BASEDIR"/boost \
-    -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a \
-    -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a \
-    -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
+  cmake .. -DBOOST_ROOT="$BASEDIR"/boost -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
 
   echo "Installing Boost libraries..."
   make -j$NUM_CORES
