@@ -117,7 +117,7 @@ def fit(gray_img):
 
 
 def is_intersecting(box0, box_list):
-    overlap_tolerance = 0.95
+    overlap_tolerance = 1.0
     for idx, (box1, img) in enumerate(box_list):
         if not (box1[t][x] >= (box0[b][x] * overlap_tolerance)) \
                 and not (box0[t][x] >= (box1[b][x] * overlap_tolerance)) \

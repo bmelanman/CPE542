@@ -199,7 +199,6 @@ if __name__ == "__main__":
     img_list = [
         "performance.png",
         "this_is_a_test.png",
-        "tesseract_sample.jpg",
         "card.jpeg",
         "book.png",
     ]
@@ -236,3 +235,4 @@ if __name__ == "__main__":
             tflite_model_location=tflite_model_path,
             pred_min=min_conf
         )
+

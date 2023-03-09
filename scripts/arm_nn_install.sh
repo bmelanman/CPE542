@@ -128,8 +128,9 @@ run_prog() {
   disp_msg "Installing necessary tools..."
 #  echo "Checking for updates and installing various tools and packages..."
 #  apt-get update
-#  apt-get install -y scons cmake autoconf libtool libpcre3 libpcre3-dev build-essential checkinstall libncursesw5-dev \
-#    libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev
+#  apt-get install -y scons cmake autoconf libtool bison byacc libpcre3 libpcre3-dev build-essential checkinstall \
+#    libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libhdf5-dev libhdf5-serial-dev \
+#    libatlas-base-dev
 #  echo "Done!"
 
   # Install ComputeLib
@@ -142,14 +143,14 @@ run_prog() {
 
   # Install Protobuf
   disp_msg "Installing Protobuf..."
-#  download_lib "protobuf" "-b v3.5.0 https://github.com/google/protobuf.git"
-#  echo "Configuring Protobuf..."
-#  ./autogen.sh
-#  ./configure --prefix="$BASEDIR"/protobuf-host
-#  echo "Installing Protobuf..."
-#  make -j$NUM_CORES
-#  make install -j$NUM_CORES
-#  echo "Done!"
+  download_lib "protobuf" "https://github.com/google/protobuf.git"
+  mkdir -m 777 build && (cd build || echo_stderr "error making directory $BASEDIR/protobuf/build")
+  echo "Configuring Protobuf..."
+  cmake .. -DCMAKE_INSTALL_PREFIX="$BASEDIR/protobuf-host"
+  echo "Installing Protobuf..."
+  make -j3
+  make install -j3
+  echo "Done!"
 
   # Install Boost
   disp_msg "Installing Boost..."
@@ -166,84 +167,70 @@ run_prog() {
 #  echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
-  disp_msg "Installing TensorFlow..."
-
-  download_lib "armnn" "https://github.com/Arm-software/armnn"
-
-  download_lib "tensorflow" "https://github.com/tensorflow/tensorflow.git"
-  git checkout 590d6eef7e91a6a7392c8ffffb7b58f2e0c8bc6b
-
-  download_lib "tensorflow/flatbuffers" "https://github.com/google/flatbuffers.git"
-
-  echo "Configuring TensorFlow and Protobuf"
-  ./"$BASEDIR"/armnn/scripts/generate_tensorflow_protobuf.sh ../tensorflow-protobuf ../protobuf-host
-
-  echo "Done!"
+#  disp_msg "Installing TensorFlow..."
+#  download_lib "armnn" "https://github.com/Arm-software/armnn"
+#  download_lib "tensorflow" "https://github.com/tensorflow/tensorflow.git"
+#  download_lib "tensorflow/flatbuffers" "https://github.com/google/flatbuffers.git"
+#  echo "Configuring TensorFlow and Protobuf"
+#  cd "$BASEDIR"/tensorflow
+#  ../armnn/scripts/generate_tensorflow_protobuf.sh ../tensorflow-protobuf ../protobuf-host
+#  cd "$BASEDIR"
+#  echo "Done!"
 
   # Download and install FlatBuffers
   disp_msg "Installing FlatBuffers..."
-
-  download_lib "flatbuffers" "https://github.com/google/flatbuffers.git"
-
-  echo "Installing FlatBuffers..."
-  cmake -G "Unix Makefiles" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="-fPIC" \
-    -DFLATBUFFERS_BUILD_FLATC=1 \
-    -DCMAKE_INSTALL_PREFIX:PATH="$BASEDIR"/flatbuffers-1.12.0 -DFLATBUFFERS_BUILD_TESTS=0
-  make -j$NUM_CORES
-
-  echo "Done!"
+#  download_lib "flatbuffers" "https://github.com/google/flatbuffers.git"
+#  echo "Installing FlatBuffers..."
+#  mkdir -m 777 build && cd build
+#  cmake .. -G "Unix Makefiles" \
+#    -DCMAKE_BUILD_TYPE=Release \
+#    -DCMAKE_CXX_FLAGS="-fPIC" \
+#    -DFLATBUFFERS_BUILD_FLATC=1 \
+#    -DCMAKE_INSTALL_PREFIX:PATH="$BASEDIR"/flatbuffers -DFLATBUFFERS_BUILD_TESTS=0
+#  make -j$NUM_CORES
+#  cd "$BASEDIR"
+#  echo "Done!"
 
   #Install SWIG
   disp_msg "Installing SWIG..."
-
-  download_lib "swig" "https://github.com/swig/swig.git"
-
-  echo "Configuring SWIG..."
-  ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
-
-  echo "Installing SWIG..."
-  make -j$NUM_CORES
-  make install -j$NUM_CORES
-
-  echo "Done!"
+#  download_lib "swig" "https://github.com/swig/swig.git"
+#  echo "Configuring SWIG..."
+#  ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
+#  echo "Installing SWIG..."
+#  make -j$NUM_CORES
+#  make install -j$NUM_CORES
+#  echo "Done!"
 
   # Add lines to /etc/profile if necessary
-  echo "Updating \"/etc/profile\"..."
-
-  ADD_SWIG_PATH="export SWIG_PATH=/home/pi/armnn-tflite/swigtool/bin"
-  ADD_PATH="export PATH=$SWIG_PATH:$PATH"
-
-  if ! grep -Fxq "$ADD_SWIG_PATH" /etc/profile; then
-    echo "$ADD_SWIG_PATH" >>/etc/profile
-  fi
-  if ! grep -Fxq "$ADD_PATH" /etc/profile; then
-    echo "$ADD_PATH" >>/etc/profile
-  fi
-
-  source /etc/profile
-
-  echo "Done!"
+#  echo "Updating \"/etc/profile\"..."
+#
+#  ADD_SWIG_PATH="export SWIG_PATH=/home/pi/armnn-tflite/swigtool/bin"
+#  ADD_PATH="export PATH=$SWIG_PATH:$PATH"
+#
+#  if ! grep -Fxq "$ADD_SWIG_PATH" /etc/profile; then
+#    echo "$ADD_SWIG_PATH" >>/etc/profile
+#  fi
+#  if ! grep -Fxq "$ADD_PATH" /etc/profile; then
+#    echo "$ADD_PATH" >>/etc/profile
+#  fi
+#  source /etc/profile
+#  echo "Done!"
 
   # Build Arm NN
   disp_msg "Installing ArmNN..."
-
-  echo "Building ArmNN"
-
-  # shellcheck disable=SC2174
-  mkdir -m 777 -p "$BASEDIR"/armnn/build
-  cd "$BASEDIR"/armnn/build || exit 1
-
+#  echo "Building ArmNN"
+#  # shellcheck disable=SC2174
+#  mkdir -m 777 -p "$BASEDIR"/armnn/build
+#  cd "$BASEDIR"/armnn/build || exit 1
   echo "Making base libraries..."
   cmake .. \
     -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
     -DARMCOMPUTE_BUILD_DIR="$BASEDIR"/ComputeLibrary/build \
     -DTF_LITE_GENERATED_PATH="$BASEDIR"/tensorflow/tensorflow/lite/schema \
     -DFLATBUFFERS_ROOT="$BASEDIR"/flatbuffers \
-    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/libflatbuffers.a \
-    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
     -DFLATC_DIR="$BASEDIR"/flatbuffers/build \
+    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
+    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/build/libflatbuffers.a \
     -DDYNAMIC_BACKEND_PATHS="$BASEDIR"/armnn/src/dynamic/sample \
     -DSAMPLE_DYNAMIC_BACKEND=1 \
     -DBUILD_TF_LITE_PARSER=1 \
