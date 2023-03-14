@@ -149,7 +149,7 @@ def coords_sort(img_bx1, img_bx2):
     return -1
 
 
-def segmentation_test(gray_img):
+def segmentation_test(gray_img, debug=False):
     # Check if the image has a black or white background
     if np.mean(gray_img) < 50:
         gray_img = cv2.bitwise_not(gray_img)
@@ -168,12 +168,13 @@ def segmentation_test(gray_img):
     kernel = np.ones((1, 2), np.uint8)
     morph2 = cv2.morphologyEx(thresh2, cv2.MORPH_DILATE, kernel)
 
-    disp_img(cropped_img, "cropped_img")
-    disp_img(thresh0, "thresh0")
-    disp_img(thresh1, "thresh1")
-    disp_img(morph1, "mask")
-    disp_img(thresh2, "thresh2")
-    disp_img(morph2, "morph1")
+    if debug:
+        disp_img(cropped_img, "cropped_img")
+        disp_img(thresh0, "thresh0")
+        disp_img(thresh1, "thresh1")
+        disp_img(morph1, "mask")
+        disp_img(thresh2, "thresh2")
+        disp_img(morph2, "morph1")
 
     cnts, heirs = cv2.findContours(morph2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
@@ -210,25 +211,27 @@ def segmentation_test(gray_img):
             # Insert the box into a sorted list
             box_img_list.append(img_with_box)
 
-    for (box, char) in box_img_list:
-        cv2.rectangle(ref_img, box[t], box[b], (0, 0, 0), thickness=1)
+    if debug:
+        for (box, char) in box_img_list:
+            cv2.rectangle(ref_img, box[t], box[b], (0, 0, 0), thickness=1)
 
-    ref_shape = ref_img.shape
-    ref_resize = tf.image.resize(
-        np.expand_dims(ref_img, axis=2),
-        (ref_shape[0] * 10, ref_shape[1] * 10),
-        preserve_aspect_ratio=True
-    )
+        ref_shape = ref_img.shape
+        ref_resize = tf.image.resize(
+            np.expand_dims(ref_img, axis=2),
+            (ref_shape[0] * 10, ref_shape[1] * 10),
+            preserve_aspect_ratio=True
+        )
 
-    disp_img(ref_resize, "boxes")
+        disp_img(ref_resize, "boxes")
 
     # Sort the boxes from top left to bottom right
     box_img_list.sort(key=cmp_to_key(coords_sort), reverse=True)
 
     boxes, letters = zip(*box_img_list)
 
-    for i in range(3):
-        disp_img(letters[i], f"{i}")
+    if debug:
+        for i in range(3):
+            disp_img(letters[i], f"{i}")
 
     letters = np.stack(letters)
 

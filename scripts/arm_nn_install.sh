@@ -128,7 +128,7 @@ run_prog() {
   disp_msg "Installing necessary tools..."
 #  echo "Checking for updates and installing various tools and packages..."
 #  apt-get update
-#  apt-get install -y scons cmake autoconf libtool bison byacc libpcre3 libpcre3-dev build-essential checkinstall \
+#  apt-get install -y scons cmake swig autoconf libtool bison byacc libpcre3 libpcre3-dev build-essential checkinstall \
 #    libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libhdf5-dev libhdf5-serial-dev \
 #    libatlas-base-dev
 #  echo "Done!"
@@ -151,20 +151,6 @@ run_prog() {
   make -j3
   make install -j3
   echo "Done!"
-
-  # Install Boost
-  disp_msg "Installing Boost..."
-#  download_lib "boost" "--recursive https://github.com/boostorg/boost.git"
-#  echo "Installing Boost..."
-#  ./bootstrap.sh
-#  ./b2 cxxflags=-fPIC link=static toolset=gcc \
-#    --prefix="$BASEDIR"/boost \
-#    --build-dir="$BASEDIR"/boost/build \
-#    --with-program_options install \
-#    --with-filesystem \
-#    --with-test \
-#    --with-log
-#  echo "Done!"
 
   # Download TensorFlow, ArmNN, and FlatBuffers, then run generate_tensorflow_protobuf.sh
 #  disp_msg "Installing TensorFlow..."
@@ -191,71 +177,45 @@ run_prog() {
 #  cd "$BASEDIR"
 #  echo "Done!"
 
-  #Install SWIG
-  disp_msg "Installing SWIG..."
-#  download_lib "swig" "https://github.com/swig/swig.git"
-#  echo "Configuring SWIG..."
-#  ./autogen.sh && ./configure --prefix=/home/pi/armnn-tflite/swigtool/
-#  echo "Installing SWIG..."
-#  make -j$NUM_CORES
-#  make install -j$NUM_CORES
-#  echo "Done!"
-
-  # Add lines to /etc/profile if necessary
-#  echo "Updating \"/etc/profile\"..."
-#
-#  ADD_SWIG_PATH="export SWIG_PATH=/home/pi/armnn-tflite/swigtool/bin"
-#  ADD_PATH="export PATH=$SWIG_PATH:$PATH"
-#
-#  if ! grep -Fxq "$ADD_SWIG_PATH" /etc/profile; then
-#    echo "$ADD_SWIG_PATH" >>/etc/profile
-#  fi
-#  if ! grep -Fxq "$ADD_PATH" /etc/profile; then
-#    echo "$ADD_PATH" >>/etc/profile
-#  fi
-#  source /etc/profile
-#  echo "Done!"
-
   # Build Arm NN
   disp_msg "Installing ArmNN..."
-#  echo "Building ArmNN"
-#  # shellcheck disable=SC2174
-#  mkdir -m 777 -p "$BASEDIR"/armnn/build
-#  cd "$BASEDIR"/armnn/build || exit 1
-#  echo "Making base libraries..."
-#  cmake .. \
-#    -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
-#    -DARMCOMPUTE_BUILD_DIR="$BASEDIR"/ComputeLibrary/build \
-#    -DTF_LITE_GENERATED_PATH="$BASEDIR"/tensorflow/tensorflow/lite/schema \
-#    -DFLATBUFFERS_ROOT="$BASEDIR"/flatbuffers \
-#    -DFLATC_DIR="$BASEDIR"/flatbuffers/build \
-#    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
-#    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/build/libflatbuffers.a \
-#    -DDYNAMIC_BACKEND_PATHS="$BASEDIR"/armnn/src/dynamic/sample \
-#    -DSAMPLE_DYNAMIC_BACKEND=1 \
-#    -DBUILD_TF_LITE_PARSER=1 \
-#    -DBUILD_TF_PARSER=1 \
-#    -DARMCOMPUTENEON=1 \
-#    -DBUILD_TESTS=1 \
-#    -DARMNNREF=1
-#  make -j$NUM_CORES
-#
-#  cp "$BASEDIR"/armnn/build/*.so "$BASEDIR"/armnn/
-#
-#  # shellcheck disable=SC2174
-#  mkdir -m 777 -p "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build
-#  cd "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build || exit 1
-#  echo "Making Boost libraries..."
-#  cmake .. -DBOOST_ROOT="$BASEDIR"/boost \
-#    -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a \
-#    -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a \
-#    -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
-
-  cmake .. -DBOOST_ROOT="$BASEDIR"/boost -DBoost_SYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_system.a -DBoost_FILESYSTEM_LIBRARY="$BASEDIR"/boost/lib/libboost_filesystem.a -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
-
-  echo "Installing Boost libraries..."
+  echo "Building ArmNN"
+  # shellcheck disable=SC2174
+  mkdir -m 777 -p "$BASEDIR"/armnn/build
+  cd "$BASEDIR"/armnn/build || exit 1
+  echo "Making base libraries..."
+  cmake .. \
+    -DARMCOMPUTE_ROOT="$BASEDIR"/ComputeLibrary \
+    -DARMCOMPUTE_BUILD_DIR="$BASEDIR"/ComputeLibrary/build \
+    -DTF_LITE_GENERATED_PATH="$BASEDIR"/tensorflow/tensorflow/lite/schema \
+    -DBOOST_ROOT="$BASEDIR"/boost \
+    -DTF_GENERATED_SOURCES="$BASEDIR"/tensorflow-protobuf \
+    -DPROTOBUF_ROOT="$BASEDIR"/protobuf-host \
+    -DFLATBUFFERS_ROOT="$BASEDIR"/flatbuffers \
+    -DFLATC_DIR="$BASEDIR"/flatbuffers/build \
+    -DFLATBUFFERS_INCLUDE_PATH="$BASEDIR"/flatbuffers/include \
+    -DFLATBUFFERS_LIBRARY="$BASEDIR"/flatbuffers/build/libflatbuffers.a \
+    -DDYNAMIC_BACKEND_PATHS="$BASEDIR"/armnn/src/dynamic/sample \
+    -DBUILD_ARMNN_TFLITE_DELEGATE=ON \
+    -DSAMPLE_DYNAMIC_BACKEND=1 \
+    -DBUILD_TF_LITE_PARSER=1 \
+    -DBUILD_PYTHON_SRC=1 \
+    -DBUILD_TF_PARSER=1 \
+    -DARMCOMPUTENEON=1 \
+    -DBUILD_TESTS=1 \
+    -DARMNNREF=1
   make -j$NUM_CORES
 
+  cp "$BASEDIR"/armnn/build/*.so "$BASEDIR"/armnn/
+  cp "$BASEDIR"/armnn/build/*.so /lib
+
+  # shellcheck disable=SC2174
+  mkdir -m 777 -p "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build
+  cd "$BASEDIR"/armnn-tflite/armnn/src/dynamic/sample/build || exit 1
+  echo "Making Boost libraries..."
+  cmake .. -DARMNN_PATH="$BASEDIR"/armnn/libarmnn.so
+  echo "Installing Boost libraries..."
+  make -j$NUM_CORES
   echo "Done!"
 
   # Install PyArmNN
@@ -263,21 +223,20 @@ run_prog() {
   # https://git.mlplatform.org/ml/armnn.git/tree/python/pyarmnn/README.md
   disp_msg "Setting up python libraries..."
 
-  SWIG_EXECUTABLE="$BASEDIR"/swigtool/bin/swig
-  ARMNN_INCLUDE="$BASEDIR"/armnn/include/
   ARMNN_LIB="$BASEDIR"/armnn/build/
-  export SWIG_EXECUTABLE ARMNN_INCLUDE ARMNN_LIB
+  ARMNN_INCLUDE="$BASEDIR"/armnn/include:"$BASEDIR"/armnn/profiling/common/include
+  export ARMNN_INCLUDE ARMNN_LIB
 
   cd "$BASEDIR"/armnn/python/pyarmnn || exit 1
 
-  python3 setup.py clean --all
-  python3 swig_generate.py -v
-  python3 setup.py build_ext --inplace
-  python3 setup.py sdist
-  python3 setup.py bdist_wheel
+  sudo python3 setup.py clean --all
+  sudo python3 swig_generate.py -v
+  sudo python3 setup.py build_ext --inplace
+  sudo python3 setup.py sdist
+  sudo python3 setup.py bdist_wheel
 
-  python3 -m pip3 install dist/pyarmnn-21.0.0-cp37-cp37m-linux_armv7l.whl
-  python3 -m pip3 install opencv-python==3.4.6.27
+  sudo python3 -m pip3 install dist/*.whl
+  sudo python3 -m pip3 install opencv-python
 
   apt-get install libcblas-dev
   apt-get install libhdf5-dev

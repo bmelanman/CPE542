@@ -72,7 +72,7 @@ def camera_input():
 
 
 def display_results(input_data, prediction_data, pred_min: float):
-    # Remove any data with a prediction of less than 50%
+    # Remove any data with a prediction of less than the given confidence minimum
     filtered_list = [x for x in zip(input_data, prediction_data) if np.max(x[1]) > pred_min]
 
     # Display each character and its predicted value
@@ -99,7 +99,20 @@ def display_results(input_data, prediction_data, pred_min: float):
     cv2.destroyAllWindows()
 
 
-def main(camera, img_path, tflite_model_location, pred_min: float):
+def print_results(input_data, prediction_data, pred_min: float):
+    # Remove any data with a prediction of less than the given confidence minimum
+    filtered_list = [x for x in zip(input_data, prediction_data) if np.max(x[1]) > pred_min]
+
+    pred_str = ""
+    for _, prediction in filtered_list:
+        pred_str += result_arr[np.argmax(prediction)]
+
+    print(pred_str)
+
+    return 0
+
+
+def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     if camera:
         # Get image from camera
         test_image = camera_input()
@@ -119,11 +132,12 @@ def main(camera, img_path, tflite_model_location, pred_min: float):
 
     # Convert the image into a list of characters in image format
     # characters = segment.letters_extract(test_image)
-    characters = segment_testing.segmentation_test(test_image)
+    characters = segment_testing.segmentation_test(test_image, debug=debug)
 
     # Optional use of ArmNN Library
     arm_nn_delegate = None
     if is_raspberrypi():
+        print("Raspberry Pi Detected!\n")
         arm_nn_delegate = tf.lite.experimental.load_delegate(
             library="",  # TODO: Install library on raspberry pi
             options={
@@ -157,7 +171,10 @@ def main(camera, img_path, tflite_model_location, pred_min: float):
     print(f"Processing time: {time.time() - t0:.2f}")
 
     # Display the data
-    display_results(characters, prediction, pred_min)
+    if debug:
+        display_results(characters, prediction, pred_min)
+    else:
+        print_results(characters, prediction, pred_min)
 
 
 def user_cli():
@@ -180,12 +197,8 @@ def user_cli():
     lite_model_path = "./models/tf_lite_ocr"
 
     # TODO: Improve
-    main(
-        camera=args.camera,
-        img_path=args.input_image_path,
-        tflite_model_location=(lite_model_path + "ocr_model.tflite"),
-        pred_min=0.5
-    )
+    main(camera=args.camera, img_path=args.input_image_path,
+         tflite_model_location=(lite_model_path + "ocr_model.tflite"), pred_min=0.5)
 
 
 if __name__ == "__main__":
@@ -202,7 +215,8 @@ if __name__ == "__main__":
         "card.jpeg",
         "book.png",
     ]
-    i = -1
+    # Specify test image index, or use -1 to test all images
+    img_idx = -1
 
     # Minimum prediction confidence
     min_conf = 0.40
@@ -217,6 +231,9 @@ if __name__ == "__main__":
     tf_model_path = "./models/ocr"
     tflite_model_path = "./models/tf_lite_ocr/ocr_model.tflite"
 
+    # Print debug info and images
+    debug = False
+
     ####################################################################
     # Check for new model flag
     if create_new_model_flag:
@@ -224,8 +241,8 @@ if __name__ == "__main__":
     if create_new_model_flag or load_new_model_flag:
         tf2tflite(tf_model_path, tflite_model_path)
 
-    if i >= 0:
-        img_list = [img_list[i]]
+    if img_idx >= 0:
+        img_list = [img_list[img_idx]]
 
     for img_name in img_list:
         # Run!
@@ -233,6 +250,6 @@ if __name__ == "__main__":
             camera=camera_flag,
             img_path=img_folder + img_name,
             tflite_model_location=tflite_model_path,
-            pred_min=min_conf
+            pred_min=min_conf,
+            debug=debug
         )
-
