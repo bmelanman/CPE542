@@ -113,7 +113,7 @@ def sentence_extract(img):
 
 
 if __name__ == "__main__":
-    image = cv2.imread("./test_images/this_is_a_test.png", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("../test_images/this_is_a_test.png", cv2.IMREAD_UNCHANGED)
 
     sentence_extract(image)
 

@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 from generate_ocr import result_arr
-from segment import pad_resize
+from testing_scripts.segment_old import pad_resize
 
 
 def main(lite_model_path="./models/tf_lite_ocr/ocr_model.tflite"):

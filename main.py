@@ -1,5 +1,6 @@
 import argparse
 import io
+import os
 import time
 from pathlib import Path
 
@@ -8,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 
 import generate_ocr
-import segment_testing
+import segmentation_processing
 from generate_ocr import result_arr, input_size
 
 
@@ -132,7 +133,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
 
     # Convert the image into a list of characters in image format
     # characters = segment.letters_extract(test_image)
-    characters = segment_testing.segmentation_test(test_image, debug=debug)
+    characters = segmentation_processing.segmentation_test(test_image, debug=debug)
 
     # Optional use of ArmNN Library
     arm_nn_delegate = None
@@ -167,9 +168,6 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     # Get prediction output data
     prediction = interpreter.get_tensor(output_details['index'])
 
-    # Timer
-    print(f"Processing time: {time.time() - t0:.2f}")
-
     # Display the data
     if debug:
         display_results(characters, prediction, pred_min)
@@ -178,11 +176,14 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
 
 
 def user_cli():
+    print("\n---------------------------------------- PORC-Y ----------------------------------------\n"
+          "Hello, welcome to PORC-Y: The Python-based Optical Recognition of Characters, partiallY\n")
+
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("-c", "--camera", default=True, help="Enable webcam input (False by default)")
     parser.add_argument("-i", "--input-image-path", default=None, help="A path to an image to process")
     parser.add_argument("-m", "--model-path", default=None, help="A path to the model.tflite file")
-    parser.add_argument("-c", "--camera", default=False, help="Enable webcam input (False by default)")
 
     args = parser.parse_args()
 
@@ -201,9 +202,7 @@ def user_cli():
          tflite_model_location=(lite_model_path + "ocr_model.tflite"), pred_min=0.5)
 
 
-if __name__ == "__main__":
-    # TODO: Debugging interface
-
+def debug_interface():
     # Calculate apx. execution time
     t0 = time.time()
 
@@ -253,3 +252,15 @@ if __name__ == "__main__":
             pred_min=min_conf,
             debug=debug
         )
+
+    print(f"Processing Time: {time.time() - t0:.2f}\n")
+
+    return
+
+
+if __name__ == "__main__":
+    if os.environ.get("DEBUG") == 1:
+        print("Using debugging interface...")
+        debug_interface()
+    else:
+        user_cli()

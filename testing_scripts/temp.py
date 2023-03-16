@@ -89,7 +89,7 @@ def generate_ocr_model(filepath, epochs):
 
 
 if __name__ == "__main__":
-    generate_ocr_model(filepath="./models/ocr", epochs=100)
+    generate_ocr_model(filepath="../models/ocr", epochs=100)
 
 # model = Sequential([
 #     Input(shape=(28, 28, 1)),
