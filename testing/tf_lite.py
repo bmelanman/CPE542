@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 from generate_ocr import result_arr
-from testing_scripts.segment_old import pad_resize
+from testing.segment_old import pad_resize
 
 
 def main(lite_model_path="./models/tf_lite_ocr/ocr_model.tflite"):
@@ -16,7 +16,7 @@ def main(lite_model_path="./models/tf_lite_ocr/ocr_model.tflite"):
     output_details = interpreter.get_output_details()
 
     # Test model on random input data.
-    test_img = pad_resize(cv2.imread("./test_images/letter_c.png", cv2.IMREAD_GRAYSCALE))
+    test_img = pad_resize(cv2.imread("../saved_chars/letter_c.png", cv2.IMREAD_GRAYSCALE))
     cv2.imshow("test", test_img)
     cv2.waitKey(0)
     interpreter.set_tensor(input_details[0]['index'], [test_img])
@@ -31,4 +31,4 @@ def main(lite_model_path="./models/tf_lite_ocr/ocr_model.tflite"):
 
 
 if __name__ == "__main__":
-    tf2tflite()
+    main()

@@ -215,7 +215,7 @@ def debug_interface():
         "book.png",
     ]
     # Specify test image index, or use -1 to test all images
-    img_idx = -1
+    img_idx = 1
 
     # Minimum prediction confidence
     min_conf = 0.40
@@ -231,7 +231,7 @@ def debug_interface():
     tflite_model_path = "./models/tf_lite_ocr/ocr_model.tflite"
 
     # Print debug info and images
-    debug = False
+    debug = True
 
     ####################################################################
     # Check for new model flag
@@ -259,7 +259,7 @@ def debug_interface():
 
 
 if __name__ == "__main__":
-    if os.environ.get("DEBUG") == 1:
+    if os.environ.get("DEBUG") == '1':
         print("Using debugging interface...")
         debug_interface()
     else:
