@@ -6,7 +6,7 @@ from generate_ocr import result_arr
 from testing.segment_old import pad_resize
 
 
-def main(lite_model_path="./models/tf_lite_ocr/ocr_model.tflite"):
+def main(lite_model_path="./models/tflite_ocr/ocr_model.tflite"):
     # Load TFLite model and allocate tensors.
     interpreter = tf.lite.Interpreter(model_path=lite_model_path)
     interpreter.allocate_tensors()

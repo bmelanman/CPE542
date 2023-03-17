@@ -13,7 +13,7 @@ import segmentation_processing
 from generate_ocr import result_arr, input_size
 
 
-def tf2tflite(load_filepath="./models/ocr", save_filepath="./models/tf_lite_ocr/"):
+def tf2tflite(load_filepath="./models/ocr", save_filepath="./models/tflite_ocr/"):
     # Load regular TF model
     model = tf.keras.models.load_model(load_filepath)
 
@@ -114,6 +114,10 @@ def print_results(input_data, prediction_data, pred_min: float):
         pred_str += result_arr[np.argmax(prediction)]
 
     print(pred_str)
+    print(f"The given image is predicted to contain the following: \n"
+          f"{pred_str}\n"
+          f"\n"
+          f"Done!\n")
 
     return 0
 
@@ -179,34 +183,65 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     else:
         print_results(characters, prediction, pred_min)
 
+    return 0
+
 
 def user_cli():
-    print("\n---------------------------------------- PORC-Y ----------------------------------------\n"
+    # Disable logging from TensorFlow while not in debug mode
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+    print("---------------------------------------- PORC-Y ---------------------------------------\n"
           "Hello, welcome to PORC-Y: The Python-based Optical Recognition of Characters, partiallY\n")
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-c", "--camera", default=True, help="Enable webcam input (False by default)")
-    parser.add_argument("-i", "--input-image-path", default=None, help="A path to an image to process")
-    parser.add_argument("-m", "--model-path", default=None, help="A path to the model.tflite file")
+    parser.add_argument(    # Camera options
+        "-c", "--camera",
+        type=str,
+        default="True",
+        help="Enable webcam input (False by default)"
+    )
+    parser.add_argument(    # Image options
+        "-i", "--input-image-path",
+        type=str,
+        default=None,
+        help="A path to an image to process"
+    )
+    parser.add_argument(    # Model options
+        "-m", "--model-path",
+        type=str,
+        default=None,
+        help="A path to a model.tflite file"
+    )
 
     args = parser.parse_args()
 
-    if args.input_image_path is None and args.camera is False:
+    # Convert the camera option to boolean
+    camera_bool = args.camera.lower() in ("yes", "true", "t", "1")
+
+    # Check for valid configurations
+    if args.input_image_path is None and camera_bool is False:
         print("Please provide an image file or enable the webcam input!")
         exit(1)
-
     if args.model_path is None:
         print("Please provide a model.tflite file!")
         exit(1)
 
-    # TODO: Improve
+    # User Prompt
+    print(f" - Camera input is set to:  {camera_bool}")
+    print(f" - Image input is set to:   {not camera_bool}")
+    print(f" - Image path is set to:    {args.input_image_path}")
+    print(f" - Model Path is set to:    {args.model_path}\n")
+    input("Press any key to continue...\n")
+
     main(
-        camera=args.camera,
+        camera=camera_bool,
         img_path=args.input_image_path,
         tflite_model_location=args.model_path,
         pred_min=0.5
     )
+
+    return 0
 
 
 def debug_interface():
@@ -235,7 +270,7 @@ def debug_interface():
     load_new_model_flag = True
     num_epochs = None
     tf_model_path = "./models/ocr"
-    tflite_model_path = "./models/tf_lite_ocr/ocr_model.tflite"
+    tflite_model_path = "models/tflite_ocr/ocr_model.tflite"
 
     # Print debug info and images
     debug = True
@@ -262,7 +297,7 @@ def debug_interface():
 
     print(f"Processing Time: {time.time() - t0:.2f}\n")
 
-    return
+    return 0
 
 
 if __name__ == "__main__":
@@ -271,3 +306,5 @@ if __name__ == "__main__":
         debug_interface()
     else:
         user_cli()
+
+    exit(0)
