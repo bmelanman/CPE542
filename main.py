@@ -145,7 +145,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
         print("Raspberry Pi Detected!\n")
 
         arm_nn_delegate = tf.lite.experimental.load_delegate(
-            library="",  # TODO: Install library on raspberry pi
+            library="/lib/armnn/libarmnnDelegate.so",  # TODO: Install library on raspberry pi
             options={
                 "backends": "CpuAcc,GpuAcc,CpuRef",
                 "logging-severity": "info"
