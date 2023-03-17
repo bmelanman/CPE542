@@ -152,7 +152,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
 
         if Path(lib_path).is_file():
             arm_nn_delegate = tf.lite.experimental.load_delegate(
-                library=,  # TODO: Install library on raspberry pi
+                library=lib_path,  # TODO: Install library on raspberry pi
                 options={
                     "backends": "CpuAcc,GpuAcc,CpuRef",
                     "logging-severity": "info"
