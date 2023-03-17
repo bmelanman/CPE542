@@ -113,9 +113,8 @@ def print_results(input_data, prediction_data, pred_min: float):
     for _, prediction in filtered_list:
         pred_str += result_arr[np.argmax(prediction)]
 
-    print(pred_str)
-    print(f"The given image is predicted to contain the following: \n"
-          f"{pred_str}\n"
+    print(f"\nThe given image is predicted to contain the following: \n"
+          f"\'{pred_str}\'\n"
           f"\n"
           f"Done!\n")
 
@@ -153,6 +152,9 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
         if Path(lib_path).is_file():
             print(f"ArmNN delegate library found!")
             print(f"Library location: {lib_path}")
+
+            os.environ["GLOG_minloglevel"] = "3"
+
             arm_nn_delegate = tf.lite.experimental.load_delegate(
                 library=lib_path,
                 options={
