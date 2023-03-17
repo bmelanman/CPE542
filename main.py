@@ -200,13 +200,11 @@ def user_cli():
         print("Please provide an image file or enable the webcam input!")
         exit(1)
 
-    lite_model_path = "./models/tf_lite_ocr"
-
     # TODO: Improve
     main(
         camera=args.camera,
         img_path=args.input_image_path,
-        tflite_model_location=(lite_model_path + "ocr_model.tflite"),
+        tflite_model_location=args.model_path,
         pred_min=0.5
     )
 
