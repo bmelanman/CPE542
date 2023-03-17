@@ -135,42 +135,32 @@ def disp_img(image, name, color_map='gray'):
 
 
 def fit(gray_img):
-    # threshold
+    # Threshold
     thresh = cv2.threshold(gray_img, 190, 255, cv2.THRESH_BINARY)[1]
 
-    # apply morphology
+    # Apply morphology
     kernel = np.ones((7, 7), np.uint8)
     morph1 = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
     kernel = np.ones((9, 9), np.uint8)
     morph2 = cv2.morphologyEx(morph1, cv2.MORPH_ERODE, kernel)
 
-    # get the largest contour by area
+    # Get the largest contour by area
     contours = cv2.findContours(morph2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contours = contours[0] if len(contours) == 2 else contours[1]
     sorted_cnts = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    # bxs = [cv2.minAreaRect(c) for c in sorted_cnts]
-    # bxs2 = [cv2.boxPoints(b1) for b1 in bxs]
-    # bxs3 = [np.int0(b2) for b2 in bxs2]
-
-    # pt0, pt1, pt2, pt3 = bxs3[0]
-    # cropped_img = gray_img[]
-
-    # get bounding box
+    # Get bounding box
     x_val, y_val, w, h = cv2.boundingRect(sorted_cnts[0])
     cropped_img = gray_img[y_val:y_val + h, x_val:x_val + w]
 
-    # crop result
+    # Crop result
     return cropped_img
 
 
 def is_intersecting(box0, box_list):
-    overlap_tolerance = 1.0
     for idx, (box1, img) in enumerate(box_list):
-        if not (box1[t][x] >= (box0[b][x] * overlap_tolerance)) \
-                and not (box0[t][x] >= (box1[b][x] * overlap_tolerance)) \
-                and not (box1[t][y] >= (box0[b][y] * overlap_tolerance)) \
-                and not (box0[t][y] >= (box1[b][y] * overlap_tolerance)):
+        if not (box1[t][x] >= box0[b][x]) and not (box0[t][x] >= box1[b][x]) \
+                and not (box1[t][y] >= box0[b][y]) and not (box0[t][y] >= box1[b][y]):
             return idx
     return None
 
@@ -197,40 +187,36 @@ def coords_sort(img_bx1, img_bx2):
     return -1
 
 
-def segmentation_test(gray_img, debug=False):
+def segment_img(gray_img, debug=False):
     # Check if the image has a black or white background
     if np.mean(gray_img) < 50:
         gray_img = cv2.bitwise_not(gray_img)
 
+    # Crop out any excess white space
     cropped_img = fit(gray_img)
 
+    # Threshold for a image to use for final output images
     thresh0 = cv2.threshold(cropped_img, 127, 255, cv2.THRESH_BINARY)[1]
 
+    # Adaptive threshold + invert for masking
     thresh1 = cv2.adaptiveThreshold(cropped_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
+    # Blend vertically to merge and i's or j's
     rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 5))
     morph1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, rect_kernel)
-
     thresh2 = cv2.threshold(morph1, 190, 255, cv2.THRESH_BINARY_INV)[1]
 
+    # Thicken things to make boxes a little bigger than the character
     kernel = np.ones((1, 2), np.uint8)
     morph2 = cv2.morphologyEx(thresh2, cv2.MORPH_DILATE, kernel)
 
-    if debug:
-        disp_img(cropped_img, "cropped_img")
-        disp_img(thresh0, "thresh0")
-        disp_img(thresh1, "thresh1")
-        disp_img(morph1, "mask")
-        disp_img(thresh2, "thresh2")
-        disp_img(morph2, "morph1")
-
+    # Use findContours to find characters
     cnts, heirs = cv2.findContours(morph2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     heirs = heirs[0, :, 3]
 
     box_img_list = []
-    ref_img = cropped_img.copy()
-    for i, c in enumerate(cnts):
-        if heirs[i] != -1:
+    for idx, c in enumerate(cnts):
+        if heirs[idx] != -1:
 
             # Skip areas that cannot be resized properly
             x_val, y_val, w, h = cv2.boundingRect(c)
@@ -259,7 +245,18 @@ def segmentation_test(gray_img, debug=False):
             # Insert the box into a sorted list
             box_img_list.append(img_with_box)
 
+    # Some optional debug info
     if debug:
+
+        disp_img(cropped_img, "cropped_img")
+        disp_img(thresh0, "thresh0")
+        disp_img(thresh1, "thresh1")
+        disp_img(morph1, "mask")
+        disp_img(thresh2, "thresh2")
+        disp_img(morph2, "morph1")
+
+        ref_img = cropped_img.copy()
+
         for (box, char) in box_img_list:
             cv2.rectangle(ref_img, box[t], box[b], (0, 0, 0), thickness=1)
 
@@ -272,21 +269,18 @@ def segmentation_test(gray_img, debug=False):
 
         disp_img(ref_resize, "boxes")
 
-    # Sort the boxes from top left to bottom right
+    # Sort by boxes from top left to bottom right
     box_img_list.sort(key=cmp_to_key(coords_sort), reverse=True)
-
+    # Discard coordinates, they are no longer needed
     boxes, letters = zip(*box_img_list)
-
-    if debug:
-        for i in range(3):
-            disp_img(letters[i], f"{i}")
-
+    # Reformat into shape (len(letters), 28, 28)
     letters = np.stack(letters)
 
-    if len(letters.shape) == 4:
-        return letters
-    else:
-        return np.expand_dims(letters, axis=3)
+    # Add fourth "color" dimension if necessary
+    if len(letters.shape) != 4:
+        letters = np.expand_dims(letters, axis=3)
+
+    return letters
 
 
 def display_results(input_data):
@@ -318,16 +312,18 @@ if __name__ == "__main__":
 
     img_list = [
         "this_is_a_test.png",
-        # "performance.png",
-        # "tesseract_sample.jpg",
-        # "card.jpeg",
-        # "book.png",
+        "performance.png",
+        "tesseract_sample.jpg",
+        "card.jpeg",
+        "book.png",
     ]
+    i = -1
+
+    if i > -1:
+        img_list = [img_list[i]]
 
     for image_name in img_list:
         test_image = cv2.imread("./test_images/" + image_name, cv2.IMREAD_GRAYSCALE)
-        chars = segmentation_test(test_image)
-        # display_results(chars)
-        # input("Press any key to continue... ")
+        chars = segment_img(test_image)
 
     print("Done! ")

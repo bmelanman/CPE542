@@ -14,13 +14,18 @@ from generate_ocr import result_arr, input_size
 
 
 def tf2tflite(load_filepath="./models/ocr", save_filepath="./models/tf_lite_ocr/"):
+    # Load regular TF model
     model = tf.keras.models.load_model(load_filepath)
 
+    # Convert to TFLite
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     lite_model = converter.convert()
 
+    # Save model
     with open(save_filepath + "ocr_model.tflite", 'wb') as f:
         f.write(lite_model)
+
+    return
 
 
 def is_raspberrypi():  # Random function from stack overflow that checks if the running device is a Raspberry Pi
@@ -132,13 +137,13 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
         test_image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
     # Convert the image into a list of characters in image format
-    # characters = segment.letters_extract(test_image)
-    characters = segmentation_processing.segmentation_test(test_image, debug=debug)
+    characters = segmentation_processing.segment_img(test_image, debug=debug)
 
     # Optional use of ArmNN Library
     arm_nn_delegate = None
     if is_raspberrypi():
         print("Raspberry Pi Detected!\n")
+
         arm_nn_delegate = tf.lite.experimental.load_delegate(
             library="",  # TODO: Install library on raspberry pi
             options={
@@ -198,8 +203,12 @@ def user_cli():
     lite_model_path = "./models/tf_lite_ocr"
 
     # TODO: Improve
-    main(camera=args.camera, img_path=args.input_image_path,
-         tflite_model_location=(lite_model_path + "ocr_model.tflite"), pred_min=0.5)
+    main(
+        camera=args.camera,
+        img_path=args.input_image_path,
+        tflite_model_location=(lite_model_path + "ocr_model.tflite"),
+        pred_min=0.5
+    )
 
 
 def debug_interface():
