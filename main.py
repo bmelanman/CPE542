@@ -154,7 +154,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
             print(f"ArmNN delegate library found!")
             print(f"Library location: {lib_path}")
             arm_nn_delegate = tf.lite.experimental.load_delegate(
-                library=lib_path,  # TODO: Install library on raspberry pi
+                library=lib_path,
                 options={
                     "backends": "CpuAcc,GpuAcc,CpuRef",
                     "logging-severity": "info"
@@ -167,7 +167,7 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     # Load TFLite model and set the input size to the number of characters
     interpreter = tf.lite.Interpreter(
         model_path=tflite_model_location,
-        experimental_delegates=arm_nn_delegate
+        experimental_delegates=[arm_nn_delegate]
     )
     interpreter.resize_tensor_input(0, [len(characters), input_size, input_size, 1])
     interpreter.allocate_tensors()
