@@ -192,12 +192,12 @@ def user_cli():
 
     args = parser.parse_args()
 
-    if args.model_path is None:
-        print("Please provide a model.tflite file!")
-        exit(1)
-
     if args.input_image_path is None and args.camera is False:
         print("Please provide an image file or enable the webcam input!")
+        exit(1)
+
+    if args.model_path is None:
+        print("Please provide a model.tflite file!")
         exit(1)
 
     # TODO: Improve
