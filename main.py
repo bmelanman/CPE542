@@ -151,6 +151,8 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
         lib_path = "/lib/armnn/libarmnnDelegate.so"
 
         if Path(lib_path).is_file():
+            print(f"ArmNN delegate library found!")
+            print(f"Library location: {lib_path}")
             arm_nn_delegate = tf.lite.experimental.load_delegate(
                 library=lib_path,  # TODO: Install library on raspberry pi
                 options={
