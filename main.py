@@ -148,13 +148,19 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     if is_raspberrypi():
         print("Raspberry Pi Detected!\n")
 
-        arm_nn_delegate = tf.lite.experimental.load_delegate(
-            library="/lib/armnn/libarmnnDelegate.so",  # TODO: Install library on raspberry pi
-            options={
-                "backends": "CpuAcc,GpuAcc,CpuRef",
-                "logging-severity": "info"
-            }
-        )
+        lib_path = "/lib/armnn/libarmnnDelegate.so"
+
+        if Path(lib_path).is_file():
+            arm_nn_delegate = tf.lite.experimental.load_delegate(
+                library=,  # TODO: Install library on raspberry pi
+                options={
+                    "backends": "CpuAcc,GpuAcc,CpuRef",
+                    "logging-severity": "info"
+                }
+            )
+        else:
+            print(f"Could not find ArmNN Delegate library at \'{lib_path}\'")
+            print("The ArmNN library will not be used\n")
 
     # Load TFLite model and set the input size to the number of characters
     interpreter = tf.lite.Interpreter(
@@ -187,6 +193,8 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
 
 
 def user_cli():
+    err_flag = 0
+
     # Disable logging from TensorFlow while not in debug mode
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -221,12 +229,14 @@ def user_cli():
 
     # Check for valid configurations
     if args.input_image_path is None and camera_bool is False:
-        print("Please provide an image file or enable the webcam input!")
-        exit(1)
+        print("Please provide an image file or enable webcam input!")
+        err_flag = 1
     if args.model_path is None:
         print("Please provide a model.tflite file!")
-        exit(1)
+        err_flag = 1
 
+    if err_flag == 1:
+        exit(err_flag)
     # User Prompt
     print(f" - Camera input is set to:  {camera_bool}")
     print(f" - Image input is set to:   {not camera_bool}")
