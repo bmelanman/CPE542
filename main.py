@@ -254,7 +254,7 @@ def user_cli():
     print(f" - Camera input is set to:  {camera_bool}")
     print(f" - Image input is set to:   {not camera_bool}")
     print(f" - Image path is set to:    {args.input_image_path}")
-    print(f" - Model Path is set to:    {args.model_path}\n")
+    print(f" - Model Path is set to:    {args.model_path}")
 
     if disp_bool:
         print(f" - Char Display is set to:  {disp_bool}\n")
