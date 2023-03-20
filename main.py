@@ -281,7 +281,7 @@ def debug_interface():
 
     # TFLite model flags
     create_new_model_flag = False
-    load_new_model_flag = True
+    load_new_model_flag = False
     num_epochs = None
     tf_model_path = "./models/ocr"
     tflite_model_path = "models/tflite_ocr/ocr_model.tflite"
