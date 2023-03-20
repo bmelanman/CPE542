@@ -121,7 +121,7 @@ def print_results(input_data, prediction_data, pred_min: float):
     return 0
 
 
-def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
+def main(camera, img_path, tflite_model_location, pred_min: float, debug=False, disp=False):
     if camera:
         # Get image from camera
         test_image = camera_input()
@@ -188,9 +188,10 @@ def main(camera, img_path, tflite_model_location, pred_min: float, debug=False):
     prediction = interpreter.get_tensor(output_details['index'])
 
     # Display the data
-    if debug:
+    if disp or debug:
         display_results(characters, prediction, pred_min)
-    else:
+
+    if disp or not debug:
         print_results(characters, prediction, pred_min)
 
     return 0
@@ -225,11 +226,18 @@ def user_cli():
         default=None,
         help="A path to a model.tflite file"
     )
+    parser.add_argument(    # Model options
+        "-d", "--display",
+        type=str,
+        default="False",
+        help="Display each character and its prediction information"
+    )
 
     args = parser.parse_args()
 
-    # Convert the camera option to boolean
+    # Convert the camera and display options to boolean
     camera_bool = args.camera.lower() in ("yes", "true", "t", "1")
+    disp_bool = args.display.lower() in ("yes", "true", "t", "1")
 
     # Check for valid configurations
     if args.input_image_path is None and camera_bool is False:
@@ -241,6 +249,7 @@ def user_cli():
 
     if err_flag == 1:
         exit(err_flag)
+
     # User Prompt
     print(f" - Camera input is set to:  {camera_bool}")
     print(f" - Image input is set to:   {not camera_bool}")
@@ -248,11 +257,13 @@ def user_cli():
     print(f" - Model Path is set to:    {args.model_path}\n")
     input("Press any key to continue...\n")
 
+    # Run main
     main(
         camera=camera_bool,
         img_path=args.input_image_path,
         tflite_model_location=args.model_path,
-        pred_min=0.5
+        pred_min=0.5,
+        disp=disp_bool
     )
 
     return 0
@@ -306,7 +317,8 @@ def debug_interface():
             img_path=img_folder + img_name,
             tflite_model_location=tflite_model_path,
             pred_min=min_conf,
-            debug=debug
+            debug=debug,
+            disp=debug
         )
 
     print(f"Processing Time: {time.time() - t0:.2f}\n")
